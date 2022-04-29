@@ -27,7 +27,7 @@ COPY extras/bootstrap_libmesh.sh /home/plainuser/
 USER plainuser
 SHELL ["/bin/bash", "-lc"]
 
-RUN whoami && which module && module avail \
+RUN whoami && module avail \
     && export MPI_BUILD=mpich-x86_64 \
     && module load mpi/${MPI_BUILD} \
     && cd /tmp && curl -SL https://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-3.16.6.tar.gz | tar zx && cd petsc-3.16.6 \
