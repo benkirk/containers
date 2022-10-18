@@ -23,7 +23,7 @@ RUN echo "basic zypper setup" \
     && zypper -n --no-gpg-checks install ohpc-base \
     && zypper -n --no-gpg-checks install lmod-ohpc nhc-ohpc ohpc-autotools \
     && zypper -n --no-gpg-checks install gnu9-compilers-ohpc \
-    && zypper -n --no-gpg-checks install EasyBuild-ohpc hwloc-ohpc spack-ohpc valgrind-ohpc \
+    && zypper -n --no-gpg-checks install hwloc-ohpc spack-ohpc valgrind-ohpc \
     && zypper -n --no-gpg-checks install ${MPI_FAMILY_VARIANT}-gnu9-ohpc \
     && zypper -n --no-gpg-checks install lmod-defaults-gnu9-${MPI_FAMILY_VARIANT}-ohpc \
     # && zypper -n install ohpc-gnu9-perf-tools
@@ -40,7 +40,6 @@ RUN echo "Extra packages" \
               hdf5-gnu9-ohpc phdf5-gnu9-${MPI_FAMILY}-ohpc \
               netcdf-gnu9-${MPI_FAMILY}-ohpc \
               openblas-gnu9-ohpc \
-              singularity-ohpc \
     && docker-clean
 
 # Addons Ben wants to play with

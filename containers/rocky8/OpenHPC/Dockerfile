@@ -1,4 +1,4 @@
-FROM docker.io/rockylinux/rockylinux
+FROM docker.io/rockylinux/rockylinux:8
 MAINTAINER Ben Kirk <benjamin.s.kirk@gmail.com>
 
 ########################################

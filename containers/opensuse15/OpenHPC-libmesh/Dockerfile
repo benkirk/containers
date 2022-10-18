@@ -9,7 +9,6 @@ MAINTAINER Ben Kirk <benjamin.s.kirk@gmail.com>
 USER plainuser
 SHELL ["/bin/bash", "-lc"]
 
-ARG MPI_FAMILY=openmpi4
 ARG LIBMESH_VERSION=1.6.2
 RUN whoami && echo ${LIBMESH_VERSION}-${MPI_FAMILY} && module avail \
     && module load petsc boost \
