@@ -1,4 +1,4 @@
-FROM docker.io/rockylinux/rockylinux:8
+FROM docker.io/rockylinux/rockylinux:9
 MAINTAINER Ben Kirk <benjamin.s.kirk@gmail.com>
 
 ########################################
@@ -9,7 +9,6 @@ ADD extras/docker-clean /usr/bin/docker-clean
 RUN echo "yum/dnf tweaks" \
     && chmod a+rx /usr/bin/docker-clean && docker-clean \
     && yum -y install dnf-plugins-core \
-    && yum config-manager --set-enabled powertools \
     && dnf -y update \
     && dnf -y install epel-release \
     && dnf -y groupinstall "Development Tools" \
@@ -17,7 +16,7 @@ RUN echo "yum/dnf tweaks" \
            bzip2 autoconf automake libtool \
            gcc gcc-c++ gcc-gfortran emacs make procps-ng mpich-devel \
            python3 cmake \
-           openblas-devel hdf5-devel \
+           openblas openblas-serial lapack hdf5-devel \
     && docker-clean \
     && adduser plainuser && mkdir /opt/local && chown plainuser: /opt/local
 
@@ -34,6 +33,7 @@ RUN whoami && module avail \
     && export PETSC_ARCH=${MPI_BUILD} \
     && ./configure --prefix=/opt/local/petsc/3.16.6-${MPI_BUILD} \
                    --with-cxx=`which mpicxx` --with-cc=`which mpicc` --with-fc=`which mpif90` \
+                   --with-blas-lib=/usr/lib64/libopenblas.so.0 --with-lapack-lib=/usr/lib64/liblapack.so.3 \
                    --with-shared-libraries --with-debugging=0 \
 		   --with-parmetis=1     --download-parmetis=yes \
 		   --with-metis=1        --download-metis=yes \
@@ -48,8 +48,8 @@ RUN whoami && module avail \
     && cd && rm -rf /tmp/petsc-3.16.6/ \
     && docker-clean
 
-# docker build --progress=plain --tag benjaminkirk/rocky8-libmesh-prereqs:0.0.1 .
-# docker run --rm --user plainuser -it benjaminkirk/rocky8-libmesh-prereqs:0.0.1 /bin/bash
+# docker build --progress=plain --tag benjaminkirk/rocky9-libmesh-prereqs:0.0.1 .
+# docker run --rm --user plainuser -it benjaminkirk/rocky9-libmesh-prereqs:0.0.1 /bin/bash
 
 # Local Variables:
 # mode: sh
