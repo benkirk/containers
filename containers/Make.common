@@ -7,12 +7,12 @@ version  := 0.0.1
 dockerprog    ?= $(shell which podman 2>/dev/null || which docker)
 dockerhubuser ?= benjaminkirk
 echo:
-	@echo "docker program:\t " $(dockerprog)
-	@echo "dockerhub user:\t " $(dockerhubuser)
-	@echo "top_dir:\t " $(top_dir)
-	@echo "this_dir:\t " $(this_dir)
-	@echo "label:\t\t " $(label)
-	@echo "version:\t " $(version)
+	@echo -e "docker program:\t " $(dockerprog)
+	@echo -e "dockerhub user:\t " $(dockerhubuser)
+	@echo -e "top_dir:\t " $(top_dir)
+	@echo -e "this_dir:\t " $(this_dir)
+	@echo -e "label:\t\t " $(label)
+	@echo -e "version:\t " $(version)
 
 image: .buildstamp
 
