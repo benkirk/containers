@@ -24,7 +24,6 @@ RUN echo "basic zypper setup" \
     && docker-clean
 
 # Additional development environment setup - required to use spack
-### terminfo: required because ncurses can't find E/Eterm without it...
 RUN echo "basic zypper setup" \
     && set -x \
     && zypper --non-interactive install \
