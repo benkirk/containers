@@ -1,23 +1,25 @@
 top_dir  := $(shell git rev-parse --show-toplevel)
 this_dir := $(shell pwd)
 # dockerhub lables must be lower case, apparently.
-label    := $(shell echo $(subst /,-,$(subst $(top_dir)/containers/,,$(this_dir))) | tr A-Z a-z)
-version  := 0.0.1
+label    ?= $(shell echo $(subst /,-,$(subst $(top_dir)/containers/,,$(this_dir))) | tr A-Z a-z)
+version  := $(shell cat ./Version 2>/dev/null || echo "0.0.1")
 
 dockerprog    ?= $(shell which podman 2>/dev/null || which docker)
 dockerhubuser ?= benjaminkirk
+
+DOCKER_BUILD_ARGS ?= --progress=plain
 echo:
-	@echo -e "docker program:\t " $(dockerprog)
-	@echo -e "dockerhub user:\t " $(dockerhubuser)
-	@echo -e "top_dir:\t " $(top_dir)
-	@echo -e "this_dir:\t " $(this_dir)
-	@echo -e "label:\t\t " $(label)
-	@echo -e "version:\t " $(version)
+	@printf "%s:\t %s\n"   "docker program" $(dockerprog)
+	@printf "%s:\t %s\n"   "dockerhub user" $(dockerhubuser)
+	@printf "%s:\t %s\n"   "top_dir"        $(top_dir)
+	@printf "%s:\t %s\n"   "this_dir"       $(this_dir)
+	@printf "%s:\t\t %s\n" "label"          $(label)
+	@printf "%s:\t %s\n"   "version"        $(version)
 
 image: .buildstamp
 
 .buildstamp: Makefile Dockerfile extras
-	$(dockerprog) build --progress=plain --tag $(dockerhubuser)/$(label):$(version) .
+	$(dockerprog) build $(DOCKER_BUILD_ARGS) --tag $(dockerhubuser)/$(label):$(version) .
 	date > $@
 
 clean:
@@ -30,10 +32,13 @@ clobber:
 extras: $(top_dir)/extras
 	cp -r $< $@
 
-run_container:
+run:
 	[ -d ./shared_volume/ ] \
-	&& $(dockerprog) run --rm --volume $(this_dir)/shared_volume:/sw -it $(dockerhubuser)/$(label):$(version) /bin/bash -l \
-	|| $(dockerprog) run --rm -it $(dockerhubuser)/$(label):$(version) /bin/bash -l
+	&& $(dockerprog) run $(DOCKER_RUN_ARGS) --rm --volume $(this_dir)/shared_volume:/sw -it $(dockerhubuser)/$(label):$(version) /bin/bash -l \
+	|| $(dockerprog) run $(DOCKER_RUN_ARGS) --rm -it $(dockerhubuser)/$(label):$(version) /bin/bash -l
+
+push: image
+	$(dockerprog) push $(dockerhubuser)/$(label):$(version)
 
 # Local Variables:
 # mode: makefile

@@ -17,7 +17,7 @@ RUN echo "basic zypper setup" \
     && set -x \
     && docker-clean \
     && useradd plainuser  \
-    && zypper -n install curl \
+    && zypper -n install curl xz \
     && cd /tmp/ && curl -O http://repos.openhpc.community/OpenHPC/2/Leap_15/x86_64/ohpc-release-2-1.leap15.x86_64.rpm && zypper -n --no-gpg-checks install ./ohpc-release-2-1.leap15.x86_64.rpm && rm -f ./ohpc-release-2-1.leap15.x86_64.rpm \
     && zypper -n --no-gpg-checks update \
     && zypper -n --no-gpg-checks install ohpc-base \

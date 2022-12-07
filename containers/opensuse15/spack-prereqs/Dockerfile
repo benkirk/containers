@@ -23,14 +23,15 @@ RUN echo "basic zypper setup" \
               gcc gcc-c++ gcc-fortran gmake git \
     && docker-clean
 
-# Additional development environment setup
+# Additional development environment setup - required to use spack
+### terminfo: required because ncurses can't find E/Eterm without it...
 RUN echo "basic zypper setup" \
     && set -x \
     && zypper --non-interactive install \
-              patch gzip unzip xz bzip2 tar perl openssl \
+              patch gzip unzip xz bzip2 tar perl openssl python3 ncurses-devel \
     && docker-clean
 
-#     && zypper --non-interactive install --recommends -t pattern devel_basis devel_C_C++ devel_tcl devel_perl devel_python3 \
+#  zypper --non-interactive install --recommends -t pattern devel_basis devel_C_C++ devel_tcl devel_perl devel_python3
 
 COPY extras/hello_world_mpi.C /home/plainuser/
 COPY extras/bootstrap_libmesh.sh /home/plainuser/
