@@ -1,0 +1,40 @@
+top_dir  := $(shell git rev-parse --show-toplevel)
+this_dir := $(shell pwd)
+# dockerhub lables must be lower case, apparently.
+label    := $(shell echo $(subst /,-,$(subst $(top_dir)/containers/,,$(this_dir))) | tr A-Z a-z)
+version  := 0.0.1
+
+dockerprog    ?= $(shell which podman 2>/dev/null || which docker)
+dockerhubuser ?= benjaminkirk
+echo:
+	@echo "docker program:\t " $(dockerprog)
+	@echo "dockerhub user:\t " $(dockerhubuser)
+	@echo "top_dir:\t " $(top_dir)
+	@echo "this_dir:\t " $(this_dir)
+	@echo "label:\t\t " $(label)
+	@echo "version:\t " $(version)
+
+image: .buildstamp
+
+.buildstamp: Makefile Dockerfile extras
+	$(dockerprog) build --progress=plain --tag $(dockerhubuser)/$(label):$(version) .
+	date > $@
+
+clean:
+	rm -f .buildstamp *~
+
+clobber:
+	$(MAKE) clean
+	rm -rf ./extras
+
+extras: $(top_dir)/extras
+	cp -r $< $@
+
+run_container:
+	[ -d ./shared_volume/ ] \
+	&& $(dockerprog) run --rm --volume $(this_dir)/shared_volume:/sw -it $(dockerhubuser)/$(label):$(version) /bin/bash -l \
+	|| $(dockerprog) run --rm -it $(dockerhubuser)/$(label):$(version) /bin/bash -l
+
+# Local Variables:
+# mode: makefile
+# End:

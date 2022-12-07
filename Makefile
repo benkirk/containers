@@ -1,5 +1,5 @@
-dockerfiles := $(shell find . -type f -name Dockerfile)
-image_dirs  := $(shell find . -type f -name Dockerfile | xargs -n 1 dirname)
+dockerfiles := $(shell find ./containers -type f -maxdepth 3 -name Dockerfile)
+image_dirs  := $(shell find ./containers -type f -maxdepth 3 -name Dockerfile | xargs -n 1 dirname)
 images      := $(patsubst ./containers/%, %, $(image_dirs))
 images2     := $(subst /,-,$(images))
 
