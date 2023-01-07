@@ -14,7 +14,7 @@ RUN whoami && module avail \
            --depth 1 \
            https://github.com/libMesh/libmesh.git \
     && cd libmesh && ./bootstrap \
-    && ./configure --prefix=/opt/local/libmesh/1.7.0-pre-${MPI_BUILD} \
+    && ./configure --prefix=/opt/local/libmesh/1.8.0-pre-${MPI_BUILD} \
             --disable-dependency-tracking \
             --with-methods=opt \
             --enable-optional --disable-strict-lgpl \
