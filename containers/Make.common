@@ -4,7 +4,7 @@ this_dir := $(shell pwd)
 label    ?= $(shell echo $(subst /,-,$(subst $(top_dir)/containers/,,$(this_dir))) | tr A-Z a-z)
 version  := $(shell cat ./Version 2>/dev/null || echo "0.0.1")
 
-dockerprog    ?= $(shell which podman 2>/dev/null || which docker)
+dockerprog    ?= $(shell which podmanfoobar 2>/dev/null || which docker)
 dockerhubuser ?= benjaminkirk
 
 DOCKER_BUILD_ARGS ?= --progress=plain
@@ -19,7 +19,7 @@ echo:
 image: .buildstamp
 
 .buildstamp: Makefile Dockerfile extras
-	$(dockerprog) build $(DOCKER_BUILD_ARGS) --tag $(dockerhubuser)/$(label):$(version) .
+	$(dockerprog) build $(DOCKER_BUILD_ARGS) --build-arg DOCKERHUB_ROOT=$(dockerhubuser) --tag $(dockerhubuser)/$(label):$(version) .
 	date > $@
 
 clean:
@@ -31,6 +31,7 @@ clobber:
 
 extras: $(top_dir)/extras
 	cp -r $< $@
+	[ -d ../more_extras ] && cp -r ../more_extras/* ./extras/
 
 run:
 	[ -d ./shared_volume/ ] \
@@ -39,6 +40,9 @@ run:
 
 push: image
 	$(dockerprog) push $(dockerhubuser)/$(label):$(version)
+
+pull: Makefile
+	$(dockerprog) pull $(dockerhubuser)/$(label):$(version)
 
 # Local Variables:
 # mode: makefile
