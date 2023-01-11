@@ -1,4 +1,6 @@
-FROM benjaminkirk/rocky8-libmesh-prereqs:0.0.1
+ARG DOCKERHUB_ROOT=foobar # dummy, make sure we get this from a --build-arg
+FROM ${DOCKERHUB_ROOT}/rocky8-libmesh-prereqs:0.0.1
+
 MAINTAINER Ben Kirk <benjamin.s.kirk@gmail.com>
 
 USER plainuser
