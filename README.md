@@ -4,7 +4,7 @@ Heavily Inspired by https://github.com/TACC/tacc-containers
 ## Usage
 In the examples below, `host$` indicates commands intended to be run on your host (container builder) machine, `container$` indicates commands run inside a running container.
 
-### Building a Specific Container:
+### Building & Running Specific Containers
 #### Minimal example
 ```bash
 # build a minimal CentOS 7 container, run it as root
@@ -59,3 +59,7 @@ host$ make run
 container$ find /opt/local/libmesh
 ```  
 
+### Interacting with DockerHub
+#### Minimal example
+
+TODO
