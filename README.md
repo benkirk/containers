@@ -59,8 +59,8 @@ host$ make run
 container$ find /opt/local/libmesh
 ```  
 
-### Interacting with DockerHub
-We support publishing tagged versions of a container to [DockerHub](https://hub.docker.com/) for sharing.
+### Image Tags & Interacting with DockerHub
+We support publishing tagged versions of a container to [DockerHub](https://hub.docker.com/) for sharing.  This requires a user account on the platform.  The tags applied to images are derived from the directory tree and some optional variables, as demonstrated below.
 
 #### Publishing a container with `docker push`
 ```bash
