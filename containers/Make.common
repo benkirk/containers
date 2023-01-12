@@ -2,19 +2,29 @@ top_dir  := $(shell git rev-parse --show-toplevel)
 this_dir := $(shell pwd)
 # dockerhub lables must be lower case, apparently.
 label    ?= $(shell echo $(subst /,-,$(subst $(top_dir)/containers/,,$(this_dir))) | tr A-Z a-z)
-version  := $(shell cat ./Version 2>/dev/null || echo "0.0.1")
+version  ?= $(shell cat ./Version 2>/dev/null || echo "0.0.1")
 
 dockerprog    ?= $(shell which podmanfoobar 2>/dev/null || which docker)
 dockerhubroot ?= benjaminkirk
 
+image_tag ?= $(dockerhubroot)/$(label):$(version)
+
 DOCKER_BUILD_ARGS ?= --progress=plain
+
 echo:
-	@printf "%s:\t %s\n"   "docker program" $(dockerprog)
-	@printf "%s:\t %s\n"   "dockerhub user" $(dockerhubroot)
-	@printf "%s:\t %s\n"   "top_dir"        $(top_dir)
-	@printf "%s:\t %s\n"   "this_dir"       $(this_dir)
-	@printf "%s:\t\t %s\n" "label"          $(label)
-	@printf "%s:\t %s\n"   "version"        $(version)
+	@printf "# %s\n" "-------------------------------------------------------------"
+	@printf "# %s:\t %s\n"   "docker program" $(dockerprog)
+	@printf "# %s:\t %s\n"   "dockerhub root" $(dockerhubroot)
+	@printf "# %s:\t\t %s\n"   "top_dir"        $(top_dir)
+	@printf "# %s:\t\t %s\n"   "this_dir"       $(this_dir)
+	@printf "# %s:\t\t %s\n" "label"          $(label)
+	@printf "# %s:\t\t %s\n"   "version"        $(version)
+	@printf "# %s:\t\t %s\n"   "image tag"      $$($(MAKE) echo_tag)
+	@printf "# %s\n" "-------------------------------------------------------------"
+
+echo_tag:
+	@printf "%s\n" $(image_tag)
+
 
 image: .buildstamp
 
