@@ -5,12 +5,12 @@ label    ?= $(shell echo $(subst /,-,$(subst $(top_dir)/containers/,,$(this_dir)
 version  := $(shell cat ./Version 2>/dev/null || echo "0.0.1")
 
 dockerprog    ?= $(shell which podmanfoobar 2>/dev/null || which docker)
-dockerhubuser ?= benjaminkirk
+dockerhubroot ?= benjaminkirk
 
 DOCKER_BUILD_ARGS ?= --progress=plain
 echo:
 	@printf "%s:\t %s\n"   "docker program" $(dockerprog)
-	@printf "%s:\t %s\n"   "dockerhub user" $(dockerhubuser)
+	@printf "%s:\t %s\n"   "dockerhub user" $(dockerhubroot)
 	@printf "%s:\t %s\n"   "top_dir"        $(top_dir)
 	@printf "%s:\t %s\n"   "this_dir"       $(this_dir)
 	@printf "%s:\t\t %s\n" "label"          $(label)
@@ -19,7 +19,7 @@ echo:
 image: .buildstamp
 
 .buildstamp: Makefile Dockerfile extras
-	$(dockerprog) build $(DOCKER_BUILD_ARGS) --build-arg DOCKERHUB_ROOT=$(dockerhubuser) --tag $(dockerhubuser)/$(label):$(version) .
+	$(dockerprog) build $(DOCKER_BUILD_ARGS) --build-arg DOCKERHUB_ROOT=$(dockerhubroot) --tag $(dockerhubroot)/$(label):$(version) .
 	date > $@
 
 clean:
@@ -37,14 +37,14 @@ extras: $(top_dir)/extras
 
 run:
 	[ -d ./shared_volume/ ] \
-	&& $(dockerprog) run $(DOCKER_RUN_ARGS) --rm --volume $(this_dir)/shared_volume:/sw -it $(dockerhubuser)/$(label):$(version) /bin/bash -l \
-	|| $(dockerprog) run $(DOCKER_RUN_ARGS) --rm -it $(dockerhubuser)/$(label):$(version) /bin/bash -l
+	&& $(dockerprog) run $(DOCKER_RUN_ARGS) --rm --volume $(this_dir)/shared_volume:/sw -it $(dockerhubroot)/$(label):$(version) /bin/bash -l \
+	|| $(dockerprog) run $(DOCKER_RUN_ARGS) --rm -it $(dockerhubroot)/$(label):$(version) /bin/bash -l
 
 push: image
-	$(dockerprog) push $(dockerhubuser)/$(label):$(version)
+	$(dockerprog) push $(dockerhubroot)/$(label):$(version)
 
 pull: Makefile
-	$(dockerprog) pull $(dockerhubuser)/$(label):$(version)
+	$(dockerprog) pull $(dockerhubroot)/$(label):$(version)
 
 # Local Variables:
 # mode: makefile
