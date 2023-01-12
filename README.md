@@ -61,22 +61,59 @@ container$ find /opt/local/libmesh
 
 ### Interacting with DockerHub
 We support publishing tagged versions of a container to [DockerHub](https://hub.docker.com/) for sharing.
+
 #### Publishing a container with `docker push`
+```bash
+cd containers/rocky9/libmesh
+
+make image
+make push
+```
+
+#### Pulling a previously published container
+```bash
+cd containers/rocky9/libmesh
+
+make pull
+make run
+```
+
+#### Micromanaging the image `tag`
 ```bash
 cd containers/rocky9/libmesh
  
 # print some metadata used to tag the image, inferred from the environment
 make echo
+# -------------------------------------------------------------
+# docker program:	 /usr/local/bin/docker
+# dockerhub root:	 benjaminkirk
+# top_dir:		 /Users/benkirk/codes/benkirk-containers
+# this_dir:		 /Users/benkirk/codes/benkirk-containers/containers/rocky9/libmesh
+# label:		 rocky9-libmesh
+# version:		 0.0.1
+# image tag:		 benjaminkirk/rocky9-libmesh:0.0.1
+# -------------------------------------------------------------
+
 
 # specifically, the tag that will be attached to the image:
 make echo_tag
+benjaminkirk/rocky9-libmesh:0.0.1
 
 # different components of the tag can be overridden:
 make echo_tag dockerhubroot="my/special/project"
-make image
+my/special/project/rocky9-libmesh:0.0.1
 
-# push the image to dockerhub usingmake image
-make push
+# the version simply defaults to 0.0.1
+# optionally, if the file ./Version exists, its contents will be used.
+# or, the version can be specified manually
+make echo_tag version="3.14159"
+benjaminkirk/rocky9-libmesh:3.14159
 
+# or the whole tag altogether:
+make echo_tag image_tag="oneoff_donotuse:0.0.0"
+oneoff_donotuse:0.0.0
+
+# make the image and push, using specified tag components
+make image version="3.14159" dockerhubroot="my/special/project"
+make push version="3.14159" dockerhubroot="my/special/project"
 ```
-TODO
