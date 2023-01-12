@@ -60,6 +60,23 @@ container$ find /opt/local/libmesh
 ```  
 
 ### Interacting with DockerHub
-#### Minimal example
+We support publishing tagged versions of a container to [DockerHub](https://hub.docker.com/) for sharing.
+#### Publishing a container with `docker push`
+```bash
+cd containers/rocky9/libmesh
+ 
+# print some metadata used to tag the image, inferred from the environment
+make echo
 
+# specifically, the tag that will be attached to the image:
+make echo_tag
+
+# different components of the tag can be overridden:
+make echo_tag dockerhubroot="my/special/project"
+make image
+
+# push the image to dockerhub usingmake image
+make push
+
+```
 TODO
