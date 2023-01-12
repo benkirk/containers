@@ -3,7 +3,7 @@
 
 ARG MPI_FAMILY=openmpi4
 
-FROM benjaminkirk/opensuse15-openhpc2-${MPI_FAMILY}:0.0.1
+FROM benjaminkirk/opensuse15-openhpc:0.0.1
 MAINTAINER Ben Kirk <benjamin.s.kirk@gmail.com>
 
 USER plainuser

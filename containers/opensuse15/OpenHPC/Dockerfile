@@ -11,6 +11,7 @@ ADD extras/docker-clean /usr/bin/docker-clean
 
 ARG MPI_FAMILY=mpich
 ARG MPI_FAMILY_VARIANT=mpich-ucx
+ARG COMPILER_VERSION=gnu12
 
 # Basic OpenHPC development environment setup, derived from Install_guide-Leap_15-Warewulf-SLURM-2.4-x86_64.pdf
 RUN echo "basic zypper setup" \
@@ -22,31 +23,31 @@ RUN echo "basic zypper setup" \
     && zypper -n --no-gpg-checks update \
     && zypper -n --no-gpg-checks install ohpc-base \
     && zypper -n --no-gpg-checks install lmod-ohpc nhc-ohpc ohpc-autotools \
-    && zypper -n --no-gpg-checks install gnu9-compilers-ohpc \
+    && zypper -n --no-gpg-checks install ${COMPILER_VERSION}-compilers-ohpc \
     && zypper -n --no-gpg-checks install hwloc-ohpc spack-ohpc valgrind-ohpc \
-    && zypper -n --no-gpg-checks install ${MPI_FAMILY_VARIANT}-gnu9-ohpc \
-    && zypper -n --no-gpg-checks install lmod-defaults-gnu9-${MPI_FAMILY_VARIANT}-ohpc \
-    # && zypper -n install ohpc-gnu9-perf-tools
-    && zypper search petsc-gnu9 trilinos-gnu9 \
+    && zypper -n --no-gpg-checks install ${MPI_FAMILY_VARIANT}-${COMPILER_VERSION}-ohpc \
+    && zypper -n --no-gpg-checks install lmod-defaults-${COMPILER_VERSION}-${MPI_FAMILY_VARIANT}-ohpc \
+    # && zypper -n install ohpc-${COMPILER_VERSION}-perf-tools
+    && zypper search petsc-${COMPILER_VERSION} trilinos-${COMPILER_VERSION} \
     && docker-clean
 
 # Addons Ben wants to play with
 RUN echo "Extra packages" \
     && set -x \
     && zypper -n --no-gpg-checks install \
-              boost-gnu9-${MPI_FAMILY}-ohpc \
-              fftw-gnu9-${MPI_FAMILY}-ohpc \
-              gsl-gnu9-ohpc \
-              hdf5-gnu9-ohpc phdf5-gnu9-${MPI_FAMILY}-ohpc \
-              netcdf-gnu9-${MPI_FAMILY}-ohpc \
-              openblas-gnu9-ohpc \
+              boost-${COMPILER_VERSION}-${MPI_FAMILY}-ohpc \
+              fftw-${COMPILER_VERSION}-${MPI_FAMILY}-ohpc \
+              gsl-${COMPILER_VERSION}-ohpc \
+              hdf5-${COMPILER_VERSION}-ohpc phdf5-${COMPILER_VERSION}-${MPI_FAMILY}-ohpc \
+              netcdf-${COMPILER_VERSION}-${MPI_FAMILY}-ohpc \
+              openblas-${COMPILER_VERSION}-ohpc \
     && docker-clean
 
 # Addons Ben wants to play with
 RUN echo "More extra packages" \
     && set -x \
     && zypper -n --no-gpg-checks install \
-           petsc-gnu9-${MPI_FAMILY}-ohpc \
+           petsc-${COMPILER_VERSION}-${MPI_FAMILY}-ohpc \
     && docker-clean
 
 

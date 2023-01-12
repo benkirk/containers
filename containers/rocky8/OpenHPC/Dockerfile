@@ -8,6 +8,7 @@ ADD extras/docker-clean /usr/bin/docker-clean
 
 ARG MPI_FAMILY=mpich
 ARG MPI_FAMILY_VARIANT=mpich-ucx
+ARG COMPILER_VERSION=gnu12
 
 # Basic OpenHPC development environment setup, derived from Install_guide-Rocky8-Warewulf-SLURM-2.4
 RUN echo "yum/dnf config" \
@@ -23,24 +24,24 @@ RUN echo "yum/dnf config" \
     && yum config-manager --set-enabled powertools \
     && yum -y install ohpc-base \
     && yum -y install lmod-ohpc nhc-ohpc ohpc-autotools \
-    && yum -y install gnu9-compilers-ohpc \
+    && yum -y install ${COMPILER_VERSION}-compilers-ohpc \
     && yum -y install EasyBuild-ohpc hwloc-ohpc spack-ohpc valgrind-ohpc \
-    && yum -y install ${MPI_FAMILY_VARIANT}-gnu9-ohpc \
-    && yum -y install lmod-defaults-gnu9-${MPI_FAMILY_VARIANT}-ohpc \
-    # && yum -y install ohpc-gnu9-perf-tools
-    && yum search petsc-gnu9 trilinos-gnu9 ohpc \
+    && yum -y install ${MPI_FAMILY_VARIANT}-${COMPILER_VERSION}-ohpc \
+    && yum -y install lmod-defaults-${COMPILER_VERSION}-${MPI_FAMILY_VARIANT}-ohpc \
+    # && yum -y install ohpc-${COMPILER_VERSION}-perf-tools
+    && yum search petsc-${COMPILER_VERSION} trilinos-${COMPILER_VERSION} ohpc \
     && docker-clean
 
 # Addons Ben wants to play with
 RUN echo "Extra packages" \
     && set -x \
     && yum -y install \
-           boost-gnu9-${MPI_FAMILY}-ohpc \
-           fftw-gnu9-${MPI_FAMILY}-ohpc \
-           gsl-gnu9-ohpc \
-           hdf5-gnu9-ohpc phdf5-gnu9-${MPI_FAMILY}-ohpc \
-           netcdf-gnu9-${MPI_FAMILY}-ohpc \
-           openblas-gnu9-ohpc \
+           boost-${COMPILER_VERSION}-${MPI_FAMILY}-ohpc \
+           fftw-${COMPILER_VERSION}-${MPI_FAMILY}-ohpc \
+           gsl-${COMPILER_VERSION}-ohpc \
+           hdf5-${COMPILER_VERSION}-ohpc phdf5-${COMPILER_VERSION}-${MPI_FAMILY}-ohpc \
+           netcdf-${COMPILER_VERSION}-${MPI_FAMILY}-ohpc \
+           openblas-${COMPILER_VERSION}-ohpc \
            singularity-ohpc \
     && docker-clean
 
@@ -48,7 +49,7 @@ RUN echo "Extra packages" \
 RUN echo "More extra packages" \
     && set -x \
     && yum -y install \
-           petsc-gnu9-${MPI_FAMILY}-ohpc \
+           petsc-${COMPILER_VERSION}-${MPI_FAMILY}-ohpc \
     && docker-clean
 
 

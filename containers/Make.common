@@ -31,7 +31,9 @@ clobber:
 
 extras: $(top_dir)/extras
 	cp -r $< $@
-	[ -d ../more_extras ] && cp -r ../more_extras/* ./extras/
+	if [ -d ../more_extras/ ]; then \
+	  cp -r ../more_extras/* ./extras/; \
+	fi
 
 run:
 	[ -d ./shared_volume/ ] \
