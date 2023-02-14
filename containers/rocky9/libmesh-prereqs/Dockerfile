@@ -23,9 +23,19 @@ RUN echo "yum/dnf tweaks" \
 
 COPY extras/hello_world_mpi.C /home/plainuser/
 COPY extras/bootstrap_libmesh.sh /home/plainuser/
+COPY extras/install_benchmarks.sh /home/plainuser/
+
+# Prevent mpicxx from linking -lmpicxx, which we do not need, and cannot use on our Cray-EX
+RUN sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /usr/lib64/mpich/bin/mpicxx
 
 USER plainuser
 SHELL ["/bin/bash", "-lc"]
+
+RUN whoami && module avail \
+    && export MPI_BUILD=mpich-x86_64 \
+    && module load mpi/${MPI_BUILD} \
+    && sh /home/plainuser/install_benchmarks.sh \
+    && docker-clean
 
 RUN whoami && module avail \
     && export MPI_BUILD=mpich-x86_64 \

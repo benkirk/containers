@@ -7,7 +7,7 @@ MAINTAINER Ben Kirk <benjamin.s.kirk@gmail.com>
 ADD extras/docker-clean /usr/bin/docker-clean
 
 ARG MPI_FAMILY=mpich
-ARG MPI_FAMILY_VARIANT=mpich-ucx
+ARG MPI_FAMILY_VARIANT=mpich-ofi
 ARG COMPILER_VERSION=gnu12
 
 # Basic OpenHPC development environment setup, derived from Install_guide-Rocky8-Warewulf-SLURM-2.4
@@ -25,7 +25,7 @@ RUN echo "yum/dnf config" \
     && yum -y install ohpc-base \
     && yum -y install lmod-ohpc nhc-ohpc ohpc-autotools \
     && yum -y install ${COMPILER_VERSION}-compilers-ohpc \
-    && yum -y install EasyBuild-ohpc hwloc-ohpc spack-ohpc valgrind-ohpc \
+    && yum -y install hwloc-ohpc valgrind-ohpc \
     && yum -y install ${MPI_FAMILY_VARIANT}-${COMPILER_VERSION}-ohpc \
     && yum -y install lmod-defaults-${COMPILER_VERSION}-${MPI_FAMILY_VARIANT}-ohpc \
     # && yum -y install ohpc-${COMPILER_VERSION}-perf-tools
@@ -42,7 +42,6 @@ RUN echo "Extra packages" \
            hdf5-${COMPILER_VERSION}-ohpc phdf5-${COMPILER_VERSION}-${MPI_FAMILY}-ohpc \
            netcdf-${COMPILER_VERSION}-${MPI_FAMILY}-ohpc \
            openblas-${COMPILER_VERSION}-ohpc \
-           singularity-ohpc \
     && docker-clean
 
 # Addons Ben wants to play with
