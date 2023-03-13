@@ -35,6 +35,7 @@ image: .buildstamp
 
 .buildstamp: Makefile Dockerfile extras
 	$(dockerprog) build $(DOCKER_BUILD_ARGS) --build-arg DOCKERHUB_ROOT=$(dockerhubroot) --tag $(dockerhubroot)/$(label):$(version) .
+	$(dockerprog) tag  $(dockerhubroot)/$(label):$(version) $(dockerhubroot)/$(label):latest
 	date > $@
 
 clean:
@@ -55,6 +56,7 @@ run:
 
 push: image
 	$(dockerprog) push $(dockerhubroot)/$(label):$(version)
+	$(dockerprog) push $(dockerhubroot)/$(label):latest
 
 pull: Makefile
 	$(dockerprog) pull $(dockerhubroot)/$(label):$(version)
