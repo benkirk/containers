@@ -1,8 +1,10 @@
-top_dir  := $(shell git rev-parse --show-toplevel)
-this_dir := $(shell pwd)
+top_dir    := $(shell git rev-parse --show-toplevel)
+this_dir   := $(shell pwd)
+
 # dockerhub lables must be lower case, apparently.
-label    ?= $(shell echo $(subst /,-,$(subst $(top_dir)/containers/,,$(this_dir))) | tr A-Z a-z)
-version  ?= $(shell cat ./Version 2>/dev/null || echo "0.0.1")
+label      ?= $(shell echo $(subst /,-,$(subst $(top_dir)/containers/,,$(this_dir))) | tr A-Z a-z)
+git_commit := $(shell git log --max-count=1 --oneline --abbrev=7 $(this_dir) 2>/dev/null | cut -d' ' -f1)
+version    ?= $(shell cat ./Version 2>/dev/null || echo "devel"-$(git_commit))
 
 dockerprog    ?= $(shell which podmanfoobar 2>/dev/null || which docker)
 dockerhubroot ?= benjaminkirk
@@ -21,6 +23,7 @@ echo:
 	@printf "# %s:\t\t %s\n"   "this_dir"       $(this_dir)
 	@printf "# %s:\t\t %s\n" "label"          $(label)
 	@printf "# %s:\t\t %s\n"   "version"        $(version)
+	@printf "# %s:\t\t %s\n"   "git commit"     $(git_commit)
 	@printf "# %s:\t\t %s\n"   "image tag"      $$($(MAKE) echo_tag)
 	@printf "# %s\n" "-------------------------------------------------------------"
 

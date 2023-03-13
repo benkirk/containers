@@ -38,9 +38,9 @@ RUN echo "git upstream" \
     && docker-clean
 
 RUN echo "setup build env" \
-    && mkdir -p /pv/libMeshDevelStack && cd /pv/libMeshDevelStack \
+    && mkdir -p /pv/libMeshStack && cd /pv/libMeshStack \
     && source /opt/local/libmesh_build_support/utils/versions/devel.sh \
-    && mkdir -p almalinux9/devel && cd almalinux9 \
+    && mkdir -p almalinux9/devel && cd almalinux9/devel \
     && /opt/local/libmesh_build_support/configure -C --prefix=$(pwd) \
     && docker-clean
 
