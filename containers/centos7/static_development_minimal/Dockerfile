@@ -5,21 +5,21 @@ FROM centos:7
 ########################################
 ADD extras/docker-clean /usr/bin/docker-clean
 
-RUN echo "yum/dnf tweaks" \
+RUN echo "yum update" \
     && chmod a+rx /usr/bin/docker-clean && docker-clean \
     && mkdir /opt/local \
     && yum update -y \
-    && yum groupinstall -y "Development Tools" \
-    && yum install -y \
-           gcc wget curl git which make tar \
-           libselinux-static glibc-static \
-           zlib-devel zlib-static \
-           openssl-devel openssl-static \
-           blas-devel blas-static \
-           lapack-devel lapack-static \
     && docker-clean \
     && adduser plainuser && mkdir -p /opt/local && chown plainuser: /opt/local
 
+RUN echo "yum addons" \
+    && yum install -y \
+           gcc gcc-c++ make autoconf automake \
+           wget git which tar bzip2 \
+           glibc-static \
+           zlib-devel zlib-static \
+           openssl-devel \
+    && docker-clean
 
 
 USER plainuser
@@ -31,6 +31,12 @@ RUN echo "shell customization}" \
 
 SHELL ["/bin/bash", "-lc"]
 
+########################################
+## NOTES:
+##   bash-4.2# rpm -qa | grep mpich
+##   mpich-3.2-3.2-2.el7.x86_64
+##   mpich-3.2-devel-3.2-2.el7.x86_64
+########################################
 
 
 # Local Variables:
