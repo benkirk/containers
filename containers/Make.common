@@ -34,7 +34,7 @@ echo_tag:
 image: .buildstamp
 
 .buildstamp: Makefile Dockerfile extras
-	$(dockerprog) build $(DOCKER_BUILD_ARGS) --build-arg DOCKERHUB_ROOT=$(dockerhubroot) --tag $(dockerhubroot)/$(label):$(version) .
+	$(dockerprog) build $(DOCKER_BUILD_ARGS) --build-arg DOCKERHUB_ROOT=$(dockerhubroot) --tag $(image_tag) .
 	$(dockerprog) tag  $(dockerhubroot)/$(label):$(version) $(dockerhubroot)/$(label):latest
 	date > $@
 
@@ -52,7 +52,11 @@ extras: $(top_dir)/extras
 
 run:
 	@if [ -d ./shared_volume/ ]; then DOCKER_SHARED_VOLUME_ARGS="--volume $(this_dir)/shared_volume:/sv"; fi; \
-	$(dockerprog) run $(DOCKER_RUN_ARGS) $${DOCKER_SHARED_VOLUME_ARGS} --rm -it $(dockerhubroot)/$(label):$(version) $(DOCKER_RUN_CMD)
+	$(dockerprog) run $(DOCKER_RUN_ARGS) $${DOCKER_SHARED_VOLUME_ARGS} --rm -it $(image_tag) $(DOCKER_RUN_CMD)
+
+exec:
+	@container_id=$$($(dockerprog) container list | grep "$(image_tag)" | cut -d' ' -f1); \
+	$(dockerprog) exec $(DOCKER_EXEC_ARGS) -it $${container_id} $(DOCKER_RUN_CMD)
 
 push: image
 	$(dockerprog) push $(dockerhubroot)/$(label):$(version)

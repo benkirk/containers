@@ -25,6 +25,11 @@ RUN echo "yum addons" \
            lapack-static \
     && docker-clean
 
+RUN echo "yum addons" \
+    && yum install -y \
+           emacs-nox \
+    && docker-clean
+
 RUN echo "persistent volume & permissions" \
     && mkdir -p ${BUILD_STAGE_PATH}  && chown plainuser: ${BUILD_STAGE_PATH}
 
