@@ -63,12 +63,12 @@ RUN echo "setup build env: stable" \
     && ${BUILD_STAGE_PATH}/libmesh_build_support/configure --prefix=$(pwd) \
     && docker-clean
 
-RUN echo "setup build env: bleeding" \
-    && cd ${BUILD_STAGE_PATH} \
-    && source ${BUILD_STAGE_PATH}/libmesh_build_support/utils/versions/bleeding.sh \
-    && mkdir -p centos7/bleeding && cd centos7/bleeding \
-    && ${BUILD_STAGE_PATH}/libmesh_build_support/configure --prefix=$(pwd) \
-    && docker-clean
+# RUN echo "setup build env: bleeding" \
+#     && cd ${BUILD_STAGE_PATH} \
+#     && source ${BUILD_STAGE_PATH}/libmesh_build_support/utils/versions/bleeding.sh \
+#     && mkdir -p centos7/bleeding && cd centos7/bleeding \
+#     && ${BUILD_STAGE_PATH}/libmesh_build_support/configure --prefix=$(pwd) \
+#     && docker-clean
 
 RUN echo "setup build env: default" \
     && cd ${BUILD_STAGE_PATH} \
