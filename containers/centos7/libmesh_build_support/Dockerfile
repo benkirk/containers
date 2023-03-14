@@ -39,23 +39,30 @@ RUN echo "shell customization" \
 SHELL ["/bin/bash", "-lc"]
 
 RUN echo "git upstream" \
-    && cd /opt/local/ \
+    && cd ${BUILD_STAGE_PATH} \
     && git clone https://github.com/benkirk/libmesh_build_support.git \
     && cd libmesh_build_support && ./autogen.sh \
     && docker-clean
 
 RUN echo "setup build env: devel" \
     && cd ${BUILD_STAGE_PATH} \
-    && source /opt/local/libmesh_build_support/utils/versions/devel.sh \
+    && source ${BUILD_STAGE_PATH}/libmesh_build_support/utils/versions/devel.sh \
     && mkdir -p centos7/devel && cd centos7/devel \
-    && /opt/local/libmesh_build_support/configure -C --prefix=$(pwd) \
+    && ${BUILD_STAGE_PATH}/libmesh_build_support/configure -C --prefix=$(pwd) \
     && docker-clean
 
 RUN echo "setup build env: stable" \
     && cd ${BUILD_STAGE_PATH} \
-    && source /opt/local/libmesh_build_support/utils/versions/stable.sh \
+    && source ${BUILD_STAGE_PATH}/libmesh_build_support/utils/versions/stable.sh \
     && mkdir -p centos7/stable && cd centos7/stable \
-    && /opt/local/libmesh_build_support/configure -C --prefix=$(pwd) \
+    && ${BUILD_STAGE_PATH}/libmesh_build_support/configure -C --prefix=$(pwd) \
+    && docker-clean
+
+RUN echo "setup build env: default" \
+    && cd ${BUILD_STAGE_PATH} \
+    && source ${BUILD_STAGE_PATH}/libmesh_build_support/utils/versions/default.sh \
+    && mkdir -p centos7/default && cd centos7/default \
+    && ${BUILD_STAGE_PATH}/libmesh_build_support/configure -C --prefix=$(pwd) \
     && docker-clean
 
 
