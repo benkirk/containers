@@ -53,22 +53,31 @@ RUN echo "setup build env: devel" \
     && cd ${BUILD_STAGE_PATH} \
     && source ${BUILD_STAGE_PATH}/libmesh_build_support/utils/versions/devel.sh \
     && mkdir -p centos7/devel && cd centos7/devel \
-    && ${BUILD_STAGE_PATH}/libmesh_build_support/configure -C --prefix=$(pwd) \
+    && ${BUILD_STAGE_PATH}/libmesh_build_support/configure --prefix=$(pwd) \
     && docker-clean
 
 RUN echo "setup build env: stable" \
     && cd ${BUILD_STAGE_PATH} \
     && source ${BUILD_STAGE_PATH}/libmesh_build_support/utils/versions/stable.sh \
     && mkdir -p centos7/stable && cd centos7/stable \
-    && ${BUILD_STAGE_PATH}/libmesh_build_support/configure -C --prefix=$(pwd) \
+    && ${BUILD_STAGE_PATH}/libmesh_build_support/configure --prefix=$(pwd) \
+    && docker-clean
+
+RUN echo "setup build env: bleeding" \
+    && cd ${BUILD_STAGE_PATH} \
+    && source ${BUILD_STAGE_PATH}/libmesh_build_support/utils/versions/bleeding.sh \
+    && mkdir -p centos7/bleeding && cd centos7/bleeding \
+    && ${BUILD_STAGE_PATH}/libmesh_build_support/configure --prefix=$(pwd) \
     && docker-clean
 
 RUN echo "setup build env: default" \
     && cd ${BUILD_STAGE_PATH} \
     && source ${BUILD_STAGE_PATH}/libmesh_build_support/utils/versions/default.sh \
     && mkdir -p centos7/default && cd centos7/default \
-    && ${BUILD_STAGE_PATH}/libmesh_build_support/configure -C --prefix=$(pwd) \
+    && ${BUILD_STAGE_PATH}/libmesh_build_support/configure --prefix=$(pwd) \
     && docker-clean
+
+ENV BUILD_STAGE_PATH=${BUILD_STAGE_PATH}
 
 
 # Local Variables:
