@@ -6,20 +6,11 @@ MAINTAINER Ben Kirk <benjamin.s.kirk@gmail.com>
 ########################################
 ADD extras/docker-clean /usr/bin/docker-clean
 
-# RUN echo "yum/dnf tweaks" \
-#     && chmod a+rx /usr/bin/docker-clean && docker-clean \
-#     && yum -y install dnf-plugins-core \
-#     && yum config-manager --set-enabled powertools \
-#     && dnf -y update \
-#     && dnf -y install epel-release \
-#     && dnf -y groupinstall "Development Tools" \
-#     && dnf -y install \
-#            bzip2 autoconf automake libtool \
-#            gcc gcc-c++ gcc-gfortran emacs make procps-ng mpich-devel \
-#            python3 cmake \
-#            openblas-devel hdf5-devel \
-#     && docker-clean \
-#     && adduser plainuser && mkdir /opt/local && chown plainuser: /opt/local
+RUN echo "yum/dnf tweaks" \
+    && chmod a+rx /usr/bin/docker-clean && docker-clean \
+    && yum -y update \
+    && docker-clean \
+    && adduser plainuser && mkdir /opt/local && chown plainuser: /opt/local
 
 # COPY extras/hello_world_mpi.C /home/plainuser/
 # COPY extras/bootstrap_libmesh.sh /home/plainuser/
