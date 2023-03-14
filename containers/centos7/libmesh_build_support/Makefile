@@ -1,4 +1,4 @@
-bundle_dir = "/aerolab/testing/char"
+bundle_dir = "/anyplace/I_like"
 
 DOCKER_BUILD_ARGS := --progress=plain --build-arg BUILD_STAGE_PATH=$(bundle_dir)
 
