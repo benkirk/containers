@@ -1,6 +1,6 @@
 FROM centos:7
 
-ARG BUILD_STAGE_PATH "/pv/path_for/bundle"
+ARG BUILD_STAGE_PATH="/pv/path_for/bundle"
 
 ########################################
 # Add docker-clean
@@ -18,11 +18,11 @@ RUN echo "yum addons" \
     && yum install -y \
            gcc gcc-c++ make autoconf automake \
            wget git which tar bzip2 \
-           glibc-static \
-           zlib-devel zlib-static \
            openssl-devel \
-           blas-devel blas-static \
-           lapack-devel lapack-static \
+           glibc-static \
+           zlib-static \
+           blas-static \
+           lapack-static \
     && docker-clean
 
 RUN echo "persistent volume & permissions" \
