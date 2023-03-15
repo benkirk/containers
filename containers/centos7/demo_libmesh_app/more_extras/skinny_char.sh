@@ -1,9 +1,8 @@
-#git clone --filter=blob:none --no-checkout git@gitlab-fsl.jsc.nasa.gov:CHAR/char.git
-git clone --filter=blob:none --no-checkout git@gitlab-fsl.jsc.nasa.gov:CHAR/char.git char-wo_testing
+git clone --filter=blob:none --no-checkout git@gitlab-fsl.jsc.nasa.gov:CHAR/char.git char-wo_testing || exit 1
 
-cd char-wo_testing
+cd char-wo_testing || exit 1
 
-git sparse-checkout init --no-cone
+git sparse-checkout init --no-cone || exit 1
 
 # cat .git/info/sparse-checkout
 
