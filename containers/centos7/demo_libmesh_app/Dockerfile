@@ -12,7 +12,7 @@ RUN echo $(whoami)
 
 RUN echo "populating build env: ${build_variant}" \
     && cd ${BUILD_STAGE_PATH} \
-    && make -C centos7/${build_variant} \
+    && make -C centos7/${build_variant} all install\
     && docker-clean
 
 ENV APP_STAGE_PATH=${APP_STAGE_PATH}
