@@ -1,4 +1,4 @@
-FROM benjaminkirk/centos7-libmesh_build_support:latest
+FROM benjaminkirk/centos7-libmesh_build_support
 
 ARG APP_STAGE_PATH="/pv/path_for/bundle"
 ARG build_variant="devel"
