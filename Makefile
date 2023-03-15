@@ -26,6 +26,9 @@ tags TAGS etags:
 	  etags $$(git ls-tree -r HEAD --name-only) ; \
 	fi
 
+clobber:
+	git clean -xdi . --exclude=shared_volume
+
 # any other rule, if not specified here, run on each container
 %:
 	for image_dir in $(images) ; do \
