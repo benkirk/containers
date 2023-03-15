@@ -21,3 +21,5 @@ ${CHAR_SRC_DIR}/configure \
 make -j 8 -l 16. || exit 1
 make install || exit 1
 make check
+
+ldd ${APP_STAGE_PATH}/install/bin/char
