@@ -6,7 +6,7 @@
 #------------------------------------------------------------------
 # Vanilla libmesh app
 cd /opt/local || exit 1
-cp -r ${LIBMESH_DIR}/examples/introduction/ex4 . && cd ex4 || exit 1
+cp -r ${LIBMESH_ROOT}/examples/introduction/ex4 . && cd ex4 || exit 1
 make
 ldd ./example-opt
 mpiexec -n 4 ./example-opt -d 3 -n 50
