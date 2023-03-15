@@ -1,9 +1,19 @@
 #!/bin/badh
 
 
-CHAR_SRC_DIR=${CHAR_SRC_DIR:-"/sv/char-wo_testing"}
-
 [ -f ${STACK_CONFIG} ] && source ${STACK_CONFIG}
+
+#------------------------------------------------------------------
+# Vanilla libmesh app
+cd /opt/local || exit 1
+cp -r ${LIBMESH_DIR}/examples/introduction/ex4 . && cd ex4 || exit 1
+make
+ldd ./example-opt
+mpiexec -n 4 ./example-opt -d 3 -n 50
+
+
+#------------------------------------------------------------------
+CHAR_SRC_DIR=${CHAR_SRC_DIR:-"/sv/char-wo_testing"}
 
 cd ${CHAR_SRC_DIR} || exit 1
 ./bootstrap || exit 1
