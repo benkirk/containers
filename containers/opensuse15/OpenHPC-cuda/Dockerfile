@@ -22,37 +22,19 @@ RUN echo "basic zypper setup" \
     && zypper -n --no-gpg-checks install lmod-defaults-${COMPILER_VERSION}-${MPI_FAMILY_VARIANT}-ohpc \
     && docker-clean
 
+# https://developer.nvidia.com/cuda-11-7-1-download-archive
 RUN echo "Cuda" \
-    && zypper -n --no-gpg-checks addrepo https://developer.download.nvidia.com/compute/cuda/repos/opensuse15/x86_64/cuda-opensuse15.repo \
+    && curl -O https://developer.download.nvidia.com/compute/cuda/11.7.1/local_installers/cuda-repo-opensuse15-11-7-local-11.7.1_515.65.01-1.x86_64.rpm \
+    && rpm -i cuda-repo-opensuse15-11-7-local-11.7.1_515.65.01-1.x86_64.rpm && rm -f cuda-repo-opensuse15-11-7-local-11.7.1_515.65.01-1.x86_64.rpm \
     && zypper -n --no-gpg-checks refresh \
     && zypper -n --no-gpg-checks install -y cuda \
     && docker-clean
-
-# # Addons Ben wants to play with
-# RUN echo "Extra packages" \
-#     && set -x \
-#     && zypper -n --no-gpg-checks install \
-#               boost-${COMPILER_VERSION}-${MPI_FAMILY}-ohpc \
-#               fftw-${COMPILER_VERSION}-${MPI_FAMILY}-ohpc \
-#               gsl-${COMPILER_VERSION}-ohpc \
-#               hdf5-${COMPILER_VERSION}-ohpc phdf5-${COMPILER_VERSION}-${MPI_FAMILY}-ohpc \
-#               netcdf-${COMPILER_VERSION}-${MPI_FAMILY}-ohpc \
-#               openblas-${COMPILER_VERSION}-ohpc \
-#     && docker-clean
-#
-# # Addons Ben wants to play with
-# RUN echo "More extra packages" \
-#     && set -x \
-#     && zypper -n --no-gpg-checks install \
-#               petsc-${COMPILER_VERSION}-${MPI_FAMILY}-ohpc \
-#     && docker-clean
-
 
 # Prevent mpicxx from linking -lmpicxx, which we do not need, and cannot use on our Cray-EX
 RUN sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /opt/ohpc/pub/mpi/${MPI_FAMILY_VARIANT}-${COMPILER_VERSION}-ohpc/3.4.3/bin/mpicxx
 
 RUN mkdir /opt/ohpc/pub/moduledeps/gnu12/cuda
-COPY extras/cuda-12.1 /opt/ohpc/pub/moduledeps/gnu12/cuda/12.1
+COPY extras/cuda-11.7 /opt/ohpc/pub/moduledeps/gnu12/cuda/11.7
 COPY extras/3.4.3-ofi-cuda /opt/ohpc/pub/moduledeps/gnu12/mpich/
 COPY extras/hello_world_mpi.C /home/plainuser/
 COPY extras/bootstrap_libmesh.sh /home/plainuser/
@@ -78,7 +60,7 @@ RUN whoami && module avail \
                    --enable-fortran \
                    --with-libfabric=${LIBFABRIC_DIR} \
                    --with-hwloc-prefix=${HWLOC_DIR} \
-                   --with-cuda=/usr/local/cuda-12.1 \
+                   --with-cuda=/usr/local/cuda-11.7 \
     && make -j 8 && make install \
     && docker-clean
 
@@ -88,8 +70,6 @@ RUN sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /opt/local/mpich-3.4.3-
 RUN whoami && module avail \
     && module load mpich/3.4.3-ofi-cuda cuda && module list \
     && sh /home/plainuser/install_benchmarks.sh
-
-
 
 # Local Variables:
 # mode: sh
