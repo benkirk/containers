@@ -1,9 +1,4 @@
-# docker build --progress=plain --tag benjaminkirk/opensuse15-openhpc2-openmpi4:0.0.1 --build-arg MPI_FAMILY=openmpi4 --build-arg MPI_FAMILY_VARIANT=openmpi4 .
-# docker run --rm -it benjaminkirk/opensuse15-openhpc2-openmpi4:0.0.1 /bin/bash -l
-
 FROM docker.io/opensuse/leap
-
-#MAINTAINER Ben Kirk <benjamin.s.kirk@gmail.com>
 
 ADD extras/docker-clean /usr/bin/docker-clean
 
@@ -56,6 +51,9 @@ RUN echo "Cuda" \
 # Prevent mpicxx from linking -lmpicxx, which we do not need, and cannot use on our Cray-EX
 RUN sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /opt/ohpc/pub/mpi/${MPI_FAMILY_VARIANT}-${COMPILER_VERSION}-ohpc/3.4.3/bin/mpicxx
 
+RUN mkdir /opt/ohpc/pub/moduledeps/gnu12/cuda
+COPY extras/cuda-12.1 /opt/ohpc/pub/moduledeps/gnu12/cuda/12.1
+COPY extras/3.4.3-ofi-cuda /opt/ohpc/pub/moduledeps/gnu12/mpich/
 COPY extras/hello_world_mpi.C /home/plainuser/
 COPY extras/bootstrap_libmesh.sh /home/plainuser/
 COPY extras/install_benchmarks.sh /home/plainuser/
@@ -63,27 +61,33 @@ COPY extras/install_benchmarks.sh /home/plainuser/
 RUN mkdir -p /opt/local \
     && chown -R plainuser: /home/plainuser/ /opt/local
 
+RUN echo "RDMA prereqs" \
+    && set -x \
+    && zypper -n --no-gpg-checks install libibverbs-devel libpsm2-devel \
+    && docker-clean
+
 USER plainuser
 SHELL ["/bin/bash", "-lc"]
 
 RUN whoami && module avail \
-    && module load ${MPI_FAMILY} \
-    && sh /home/plainuser/install_benchmarks.sh
-
-RUN whoami && module avail \
-    && module load libfabric hwloc gnu12 \
-    && cd /tmp && curl -sSL https://www.mpich.org/static/downloads/4.1.1/mpich-4.1.1.tar.gz | tar xz \
-    && cd mpich-4.1.1 \
-    && ./configure --prefix=/opt/local/mpich-4.1.1-cuda \
-                   CC=$(which gcc) CXX=$(which g++) FC=$(which gfortran) F77=$(which gfortran) PYTHON=$(which python3) \
+    && module load -mpich +hwloc +libfabric && module list \
+    && cd /tmp && curl -sSL https://www.mpich.org/static/downloads/3.4.3/mpich-3.4.3.tar.gz | tar xz \
+    && cd mpich-3.4.3 \
+    && ./configure --prefix=/opt/local/mpich-3.4.3-cuda \
+                   CC=$(which gcc) CXX=$(which g++) FC=$(which gfortran) F77=$(which gfortran) FFLAGS=-fallow-argument-mismatch PYTHON=$(which python3) \
                    --enable-fortran \
-                   --disable-cxx \
                    --with-libfabric=${LIBFABRIC_DIR} \
-                   --with-hwloc=${HWLOC_DIR} \
+                   --with-hwloc-prefix=${HWLOC_DIR} \
                    --with-cuda=/usr/local/cuda-12.1 \
     && make -j 8 && make install \
     && docker-clean
 
+# Prevent mpicxx from linking -lmpicxx, which we do not need, and cannot use on our Cray-EX
+RUN sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /opt/local/mpich-3.4.3-cuda/bin/mpicxx
+
+RUN whoami && module avail \
+    && module load mpich/3.4.3-ofi-cuda cuda && module list \
+    && sh /home/plainuser/install_benchmarks.sh
 
 
 
