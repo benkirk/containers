@@ -8,17 +8,15 @@ ADD extras/docker-clean /usr/bin/docker-clean
 
 ARG MPI_FAMILY=mpich
 ARG MPI_FAMILY_VARIANT=mpich-ofi
-ARG COMPILER_VERSION=gnu12
+ARG COMPILER_VERSION=gnu9
 
 # Basic OpenHPC development environment setup, derived from Install_guide-Rocky8-Warewulf-SLURM-2.4
 RUN echo "yum/dnf config" \
     && set -x \
     && adduser plainuser \
-    # for  sudo access
-    # && usermod -aG wheel plainuser \
     && chmod a+rx /usr/bin/docker-clean && docker-clean \
     && yum -y update \
-    && yum -y install which \
+    && yum -y install which git tar curl xz \
     && yum -y install http://repos.openhpc.community/OpenHPC/2/EL_8/x86_64/ohpc-release-2-1.el8.x86_64.rpm \
     && yum -y install dnf-plugins-core \
     && yum config-manager --set-enabled powertools \
@@ -30,44 +28,51 @@ RUN echo "yum/dnf config" \
     && yum -y install lmod-defaults-${COMPILER_VERSION}-${MPI_FAMILY_VARIANT}-ohpc \
     && docker-clean
 
+# https://developer.nvidia.com/cuda-11-7-1-download-archive
 RUN echo "Cuda" \
-    && dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo \
-    && dnf clean all \
+    && curl -O https://developer.download.nvidia.com/compute/cuda/11.7.1/local_installers/cuda-repo-rhel8-11-7-local-11.7.1_515.65.01-1.x86_64.rpm \
+    && rpm -i cuda-repo-rhel8-11-7-local-11.7.1_515.65.01-1.x86_64.rpm && rm -f cuda-repo-rhel8-11-7-local-11.7.1_515.65.01-1.x86_64.rpm \
     && dnf -y module install nvidia-driver:latest-dkms \
     && dnf -y install cuda \
+    && echo "RDMA prereqs" \
+    && yum -y install libibverbs-devel libpsm2-devel \
     && docker-clean
 
-# # Addons Ben wants to play with
-# RUN echo "Extra packages" \
-#     && set -x \
-#     && yum -y install \
-#            boost-${COMPILER_VERSION}-${MPI_FAMILY}-ohpc \
-#            fftw-${COMPILER_VERSION}-${MPI_FAMILY}-ohpc \
-#            gsl-${COMPILER_VERSION}-ohpc \
-#            hdf5-${COMPILER_VERSION}-ohpc phdf5-${COMPILER_VERSION}-${MPI_FAMILY}-ohpc \
-#            netcdf-${COMPILER_VERSION}-${MPI_FAMILY}-ohpc \
-#            openblas-${COMPILER_VERSION}-ohpc \
-#     && docker-clean
+# Prevent mpicxx from linking -lmpicxx, which we do not need, and cannot use on our Cray-EX
+RUN sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /opt/ohpc/pub/mpi/${MPI_FAMILY_VARIANT}-${COMPILER_VERSION}-ohpc/3.4.2/bin/mpicxx
 
-# # Addons Ben wants to play with
-# RUN echo "More extra packages" \
-#     && set -x \
-#     && yum -y install \
-#            petsc-${COMPILER_VERSION}-${MPI_FAMILY}-ohpc \
-#     && docker-clean
-
-
+RUN mkdir /opt/ohpc/pub/moduledeps/${COMPILER_VERSION}/cuda
+COPY extras/cuda-11.7 /opt/ohpc/pub/moduledeps/${COMPILER_VERSION}/cuda/11.7
+COPY extras/3.4.3-ofi-cuda /opt/ohpc/pub/moduledeps/${COMPILER_VERSION}/mpich/
 COPY extras/hello_world_mpi.C /home/plainuser/
 COPY extras/bootstrap_libmesh.sh /home/plainuser/
+COPY extras/install_benchmarks.sh /home/plainuser/
 
+RUN mkdir -p /opt/local \
+    && chown -R plainuser: /home/plainuser/ /opt/local
 
 USER plainuser
 SHELL ["/bin/bash", "-lc"]
 
-RUN whoami && module avail
+RUN whoami && module avail \
+    && module load -mpich +hwloc +libfabric +cuda && module list \
+    && cd /tmp && curl -sSL https://www.mpich.org/static/downloads/3.4.3/mpich-3.4.3.tar.gz | tar xz \
+    && cd mpich-3.4.3 \
+    && ./configure --prefix=/opt/local/mpich-3.4.3-cuda \
+                   CC=$(which gcc) CXX=$(which g++) FC=$(which gfortran) F77=$(which gfortran) PYTHON=$(which python3) \
+                   --enable-fortran \
+                   --with-libfabric=${LIBFABRIC_DIR} \
+                   --with-hwloc-prefix=${HWLOC_DIR} \
+                   --with-cuda=${CUDA_HOME} \
+    && make -j 8 && make install \
+    && docker-clean
 
-# docker build --progress=plain --tag benjaminkirk/rocky8-openhpc2:0.0.1 .
-# docker run --rm --user plainuser -it benjaminkirk/rocky8-openhpc2:0.0.1 /bin/bash
+# Prevent mpicxx from linking -lmpicxx, which we do not need, and cannot use on our Cray-EX
+RUN sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /opt/local/mpich-3.4.3-cuda/bin/mpicxx
+
+RUN whoami && module avail \
+    && module load mpich/3.4.3-ofi-cuda cuda && module list \
+    && sh /home/plainuser/install_benchmarks.sh
 
 # Local Variables:
 # mode: sh
