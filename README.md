@@ -43,7 +43,10 @@ container$ whoami
 root
 ```
 
-#### Layered Containers
+#### Attaching to a running container
+In the examples above, `make run` will launch a new container using the image constructed through `make image`.  In order to connect to a running container, use instead `make exec` ; which also supports options defined through `DOCKER_EXEC_ARGS`.
+
+### Layered Containers
 We can build complex containers as a sequence of layers.  This is useful for example when an intermediate layer could be useful for multiple derived containers, or in its own right.  In the example below we create a fully featured Rocky 9 container, including some application dependencies compiled from source, then use that as a base layer to install an application environment.
 ```bash
 # Build the Rocky 9 image, containing some scientific libraries of interest:
