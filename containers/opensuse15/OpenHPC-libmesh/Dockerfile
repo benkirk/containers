@@ -1,7 +1,7 @@
 # docker build --progress=plain --tag benjaminkirk/opensuse15-openhpc2-openmpi4-libmesh:0.0.1 .
 # docker run --rm --user plainuser -it benjaminkirk/opensuse15-openhpc2-openmpi4-libmesh:0.0.1 /bin/bash -l
 
-FROM benjaminkirk/opensuse15-openhpc:0.0.1
+FROM benjaminkirk/opensuse15-openhpc:latest
 MAINTAINER Ben Kirk <benjamin.s.kirk@gmail.com>
 
 USER plainuser
