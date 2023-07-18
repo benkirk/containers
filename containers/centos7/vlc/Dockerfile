@@ -27,9 +27,9 @@ RUN echo "yum / VLC" \
 #     && sed -i 's/getuid/getppid/g' /usr/bin/vlc.asroot
 #     && cp /usr/bin/vlc.asroot /usr/bin/vlc.asroot-wrapper
 
-RUN echo "mountpoints" \
-    &&  mkdir -p /glade/{scratch,campaign,derecho/scratch,cheyenne/scratch} \
-    && find /glade -type d
+RUN echo "GLADE mountpoints" \
+    && mkdir -p /glade/{scratch,campaign,p,collections,u,work,derecho/scratch,cheyenne/scratch} \
+    && find /glade -type d | sort
 
 # Local Variables:
 # mode: sh
