@@ -21,8 +21,15 @@ RUN echo "yum / VLC" \
     && docker-clean
 
 
-RUN echo "yum / VLC - as root fix" \
-    &&  sed -i 's/geteuid/getppid/g' /usr/bin/vlc
+# RUN echo "yum / VLC - as root fix" \
+#     && cp /usr/bin/vlc /usr/bin/vlc.asroot \
+#     && sed -i 's/geteuid/getppid/g' /usr/bin/vlc.asroot \
+#     && sed -i 's/getuid/getppid/g' /usr/bin/vlc.asroot
+#     && cp /usr/bin/vlc.asroot /usr/bin/vlc.asroot-wrapper
+
+RUN echo "mountpoints" \
+    &&  mkdir -p /glade/{scratch,campaign,derecho/scratch,cheyenne/scratch} \
+    && find /glade -type d
 
 # Local Variables:
 # mode: sh
