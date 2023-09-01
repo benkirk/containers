@@ -12,6 +12,10 @@ RUN echo "basic zypper" \
     && pacman -Syu --noconfirm diffuse \
     && docker-clean
 
+# NCAR /glade mountpoints
+RUN mkdir -p /glade/{u,work,scratch,p,collections,cheyenne/scratch,derecho/scratch} \
+    && find /glade -type d
+
 SHELL ["/bin/bash", "-lc"]
 
 RUN whoami
