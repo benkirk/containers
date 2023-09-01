@@ -20,8 +20,17 @@ RUN echo "apt VLC" \
     && apt-get install -y \
                vlc
 
-USER plainuser
-SHELL ["/bin/bash", "-lc"]
+RUN echo "apt mplayer" \
+    && apt-get install -y \
+               mplayer mplayer-gui
+
+RUN mkdir -p /glade/scratch /glade/cheyenne/scratch /glade/derecho/scratch /glade/u /glade/campaign
+
+# https://unix.stackexchange.com/questions/125546/how-to-run-vlc-player-in-root
+RUN sed -i 's/geteuid/getppid/' /usr/bin/vlc
+
+#USER plainuser
+#SHELL ["/bin/bash", "-lc"]
 
 # Local Variables:
 # mode: sh

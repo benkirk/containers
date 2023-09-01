@@ -18,18 +18,9 @@ RUN echo "basic zypper setup" \
     && useradd plainuser  \
     && zypper --non-interactive refresh \
     && zypper --non-interactive update \
-    && zypper --non-interactive install \
-              curl which \
-              gcc gcc-c++ gcc-fortran gmake git \
     && docker-clean
 
-CMD which gcc && gcc --version && ls /usr && find /usr
-
-# RUN chown -R plainuser: /home/plainuser/
-# USER plainuser
-# SHELL ["/bin/bash", "-lc"]
-#
-# RUN whoami
+CMD which ls && ls /usr && find /usr
 
 # Local Variables:
 # mode: sh
