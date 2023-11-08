@@ -7,7 +7,14 @@ RUN echo "zypper install of additional GUI tools" \
               vlc vlc-qt vlc-vdpau \
               smplayer \
               gv eog evince geeqie \
-              dia inkscape xfig\
+              dia inkscape xfig \
+    && docker-clean
+
+RUN echo "zypper install of additional editors" \
+    && set -x \
+    && zypper -n install \
+              emacs emacs-x11 xemacs \
+              vim gvim neovim neovim-gtk \
     && docker-clean
 
 # Local Variables:
