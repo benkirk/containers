@@ -6,8 +6,9 @@ RUN echo "zypper install of additional GUI tools" \
               gimp \
               vlc vlc-qt vlc-vdpau \
               smplayer \
-              gv eog evince geeqie \
+              gv eog evince evince-plugin-pdfdocument geeqie qpdfview \
               dia inkscape xfig \
+              ImageMagick ImageMagick-extra \
     && docker-clean
 
 RUN echo "zypper install of additional editors" \
@@ -15,6 +16,7 @@ RUN echo "zypper install of additional editors" \
     && zypper -n install \
               emacs emacs-x11 xemacs \
               vim gvim neovim neovim-gtk \
+              nedit \
     && docker-clean
 
 # Local Variables:
