@@ -1,13 +1,15 @@
 FROM benjaminkirk/ncar-casper-site_customizations:latest
 
-ARG MPI_FAMILY=mpich
-ARG MPI_FAMILY_VARIANT=${MPI_FAMILY}-ofi
+#ARG MPI_FAMILY=mpich
+#ARG MPI_FAMILY_VARIANT=${MPI_FAMILY}-ofi
+ARG MPI_FAMILY=openmpi4
+ARG MPI_FAMILY_VARIANT=${MPI_FAMILY}
 ARG COMPILER_VERSION=gnu12
 
 # Basic OpenHPC development environment setup, derived from Install_guide-Leap_15-Warewulf-SLURM-2.4-x86_64.pdf
 RUN echo "basic zypper setup" \
     && set -x \
-    && zypper -n install curl xz \
+    && zypper -n install curl xz openssh \
     && cd /tmp/ && curl -O http://repos.openhpc.community/OpenHPC/2/Leap_15/x86_64/ohpc-release-2-1.leap15.x86_64.rpm && zypper -n --no-gpg-checks install ./ohpc-release-2-1.leap15.x86_64.rpm && rm -f ./ohpc-release-2-1.leap15.x86_64.rpm \
     && zypper -n --no-gpg-checks install ohpc-base \
     && zypper -n --no-gpg-checks install lmod-ohpc nhc-ohpc ohpc-autotools \
@@ -41,7 +43,7 @@ RUN echo "More extra packages" \
 
 
 # Prevent mpicxx from linking -lmpicxx, which we do not need, and cannot use on our Cray-EX
-RUN sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /opt/ohpc/pub/mpi/${MPI_FAMILY_VARIANT}-${COMPILER_VERSION}-ohpc/3.4.3/bin/mpicxx
+#RUN sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /opt/ohpc/pub/mpi/${MPI_FAMILY_VARIANT}-${COMPILER_VERSION}-ohpc/*/bin/mpicxx
 
 COPY extras/hello_world_mpi.C /home/plainuser/
 COPY extras/bootstrap_libmesh.sh /home/plainuser/

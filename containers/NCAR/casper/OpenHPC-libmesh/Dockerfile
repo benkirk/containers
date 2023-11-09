@@ -6,8 +6,8 @@ FROM benjaminkirk/ncar-casper-openhpc:latest
 USER plainuser
 SHELL ["/bin/bash", "-lc"]
 
-ARG MPI_FAMILY=mpich
-ARG MPI_BUILD=mpich-x86_64
+ARG MPI_FAMILY=openmpi4
+ARG MPI_BUILD=openmpi4-x86_64
 ARG LIBMESH_VERSION=1.8.0-pre
 
 RUN whoami && echo ${LIBMESH_VERSION}-${MPI_BUILD} && module avail \
