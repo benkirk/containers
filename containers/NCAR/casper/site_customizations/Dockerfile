@@ -12,7 +12,8 @@ RUN echo "basic zypper setup" \
 #  zypper --non-interactive install --recommends -t pattern devel_basis devel_C_C++ devel_tcl devel_perl devel_python3
 
 # NCAR /glade mountpoints
-RUN mkdir -p /glade/{u,work,scratch,p,collections,cheyenne/scratch,derecho/scratch} \
+RUN mkdir -p /local_scratch \
+    && mkdir -p /glade/{u,work,scratch,p,collections,cheyenne/scratch,derecho/scratch} \
     && find /glade -type d
 
 #
