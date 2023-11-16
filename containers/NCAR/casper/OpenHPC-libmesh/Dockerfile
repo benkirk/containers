@@ -40,6 +40,7 @@ RUN whoami && echo ${LIBMESH_VERSION}-${MPI_BUILD} && module avail \
     && mpiexec -n 4 ./example-opt -d 3 -n 25 \
     && make --no-print-directory clean && ls
 
+ENV LD_LIBRARY_PATH="/opt/ohpc/pub/libs/hwloc/lib:"
 
 # Local Variables:
 # mode: sh

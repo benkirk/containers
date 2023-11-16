@@ -13,7 +13,7 @@ RUN echo "basic zypper setup" \
 
 # NCAR /glade mountpoints
 RUN mkdir -p /local_scratch \
-    && mkdir -p /glade/{u,work,scratch,p,collections,cheyenne/scratch,derecho/scratch} \
+    && mkdir -p /glade/{u,work,scratch,p,campaign,collections,cheyenne/scratch,derecho/scratch} \
     && find /glade -type d
 
 #
