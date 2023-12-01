@@ -1,5 +1,5 @@
 FROM docker.io/rockylinux/rockylinux:9
-MAINTAINER Ben Kirk <benjamin.s.kirk@gmail.com>
+# (deprecated): MAINTAINER Ben Kirk <benjamin.s.kirk@gmail.com>
 
 ########################################
 # Add docker-clean

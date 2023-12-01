@@ -2,7 +2,7 @@
 # docker run --user root --rm --volume $(pwd)/data:/sw -it benjaminkirk/opensuse15-base:0.0.1 /bin/bash -l
 
 FROM docker.io/opensuse/leap
-MAINTAINER Ben Kirk <benkirk@ucar.edu>
+# (deprecated): MAINTAINER Ben Kirk <benkirk@ucar.edu>
 
 ########################################
 # Add docker-clean

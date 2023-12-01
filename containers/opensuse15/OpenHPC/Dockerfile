@@ -2,7 +2,7 @@
 # docker run --rm -it benjaminkirk/opensuse15-openhpc2-openmpi4:0.0.1 /bin/bash -l
 
 FROM docker.io/opensuse/leap
-MAINTAINER Ben Kirk <benjamin.s.kirk@gmail.com>
+# (deprecated): MAINTAINER Ben Kirk <benjamin.s.kirk@gmail.com>
 
 ADD extras/docker-clean /usr/bin/docker-clean
 

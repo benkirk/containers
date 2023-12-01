@@ -2,7 +2,7 @@
 ARG MPI_FAMILY=mpich
 
 FROM benjaminkirk/rocky8-openhpc2-${MPI_FAMILY}:0.0.1
-MAINTAINER Ben Kirk <benjamin.s.kirk@gmail.com>
+# (deprecated): MAINTAINER Ben Kirk <benjamin.s.kirk@gmail.com>
 
 USER plainuser
 SHELL ["/bin/bash", "-lc"]

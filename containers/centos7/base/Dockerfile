@@ -1,5 +1,5 @@
 FROM centos:7
-MAINTAINER Ben Kirk <benjamin.s.kirk@gmail.com>
+# (deprecated): MAINTAINER Ben Kirk <benjamin.s.kirk@gmail.com>
 
 ########################################
 # Add docker-clean

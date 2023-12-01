@@ -1,7 +1,7 @@
 ARG DOCKERHUB_ROOT=foobar # dummy, make sure we get this from a --build-arg
 FROM ${DOCKERHUB_ROOT}/rocky8-libmesh-prereqs:latest
 
-MAINTAINER Ben Kirk <benjamin.s.kirk@gmail.com>
+# (deprecated): MAINTAINER Ben Kirk <benjamin.s.kirk@gmail.com>
 
 USER plainuser
 SHELL ["/bin/bash", "-lc"]
