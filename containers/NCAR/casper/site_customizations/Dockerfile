@@ -7,6 +7,7 @@ RUN echo "basic zypper setup" \
               curl which \
               gcc gcc-c++ gcc-fortran gmake git \
               patch gzip unzip xz bzip2 tar perl openssl python3 ncurses-devel \
+              fakeroot \
     && docker-clean
 
 #  zypper --non-interactive install --recommends -t pattern devel_basis devel_C_C++ devel_tcl devel_perl devel_python3
