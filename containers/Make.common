@@ -6,7 +6,7 @@ label      ?= $(shell echo $(subst /,-,$(subst $(top_dir)/containers/,,$(this_di
 git_commit := $(shell git log --max-count=1 --oneline --abbrev=7 $(this_dir) 2>/dev/null | cut -d' ' -f1)
 version    ?= $(shell cat ./Version 2>/dev/null || echo "devel"-$(git_commit))
 
-dockerprog    ?= $(shell which podmanfoobar 2>/dev/null || which docker)
+dockerprog    ?= $(shell which docker 2>/dev/null || which podman 2>/dev/null || echo "notfound")
 dockerhubroot ?= benjaminkirk
 
 image_tag ?= $(dockerhubroot)/$(label):$(version)
