@@ -45,6 +45,7 @@ RUN echo "Installing MPI benchmark applications" \
     && echo "OSU:" \
     && cd /tmp && curl -Sl https://mvapich.cse.ohio-state.edu/download/mvapich/osu-micro-benchmarks-${OSU_VERSION}.tar.gz | tar xz \
     && cd osu-micro-benchmarks-${OSU_VERSION} \
+    && ./configure --help \
     && ./configure --prefix=/opt/local/osu-micro-benchmarks-${OSU_VERSION} \
                    CXX=$(which mpicxx) CC=$(which mpicc) FC=$(which mpif90) F77=$(which mpif77) \
     && make -j 8 V=0 && rm -rf /opt/local/osu-micro-benchmarks-${OSU_VERSION} && make install \
@@ -61,8 +62,7 @@ RUN echo "Installing MPI benchmark applications" \
     && make -C src_cpp -f Makefile TARGET=IO clean \
     && make -C src_cpp -f Makefile TARGET=MT clean \
     && make -C src_c/P2P -f Makefile TARGET=P2P clean \
-    && make -C src_cpp -f Makefile TARGET=MPI1 clean GPU_ENABLE=0
-
+    && docker-clean
 
 # Local Variables:
 # mode: sh
