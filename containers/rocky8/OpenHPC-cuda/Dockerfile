@@ -6,9 +6,10 @@ FROM docker.io/rockylinux/rockylinux:8
 ########################################
 ADD extras/docker-clean /usr/bin/docker-clean
 
+ARG COMPILER_VERSION=gnu9
 ARG MPI_FAMILY=mpich
 ARG MPI_FAMILY_VARIANT=mpich-ofi
-ARG COMPILER_VERSION=gnu9
+ARG MPICH_VERSION=${MPICH_VERSION}
 
 # Basic OpenHPC development environment setup, derived from Install_guide-Rocky8-Warewulf-SLURM-2.4
 RUN echo "yum/dnf config" \
@@ -50,7 +51,8 @@ RUN echo "Cuda" \
 
 RUN mkdir /opt/ohpc/pub/moduledeps/${COMPILER_VERSION}/cuda
 COPY extras/cuda-11.7 /opt/ohpc/pub/moduledeps/${COMPILER_VERSION}/cuda/11.7
-COPY extras/3.4.3-ofi-cuda /opt/ohpc/pub/moduledeps/${COMPILER_VERSION}/mpich/
+COPY extras/mpich-${MPICH_VERSION}-ofi-cuda /opt/ohpc/pub/moduledeps/${COMPILER_VERSION}/mpich/${MPICH_VERSION}-ofi-cuda
+
 COPY extras/hello_world_mpi.C /home/plainuser/
 COPY extras/bootstrap_libmesh.sh /home/plainuser/
 COPY extras/install_benchmarks.sh /home/plainuser/
@@ -63,9 +65,9 @@ SHELL ["/bin/bash", "-lc"]
 
 RUN whoami && module avail \
     && module load -mpich +hwloc +libfabric +cuda && module list \
-    && cd /tmp && curl -sSL https://www.mpich.org/static/downloads/3.4.3/mpich-3.4.3.tar.gz | tar xz \
-    && cd mpich-3.4.3 \
-    && ./configure --prefix=/opt/local/mpich-3.4.3-cuda \
+    && cd /tmp && curl -sSL https://www.mpich.org/static/downloads/${MPICH_VERSION}/mpich-${MPICH_VERSION}.tar.gz | tar xz \
+    && cd mpich-${MPICH_VERSION} \
+    && ./configure --prefix=/opt/local/mpich-${MPICH_VERSION}-cuda \
                    CC=$(which gcc) CXX=$(which g++) FC=$(which gfortran) F77=$(which gfortran) PYTHON=$(which python3) \
                    --enable-fortran \
                    --with-libfabric=${LIBFABRIC_DIR} \
@@ -75,10 +77,11 @@ RUN whoami && module avail \
     && docker-clean
 
 # Prevent mpicxx from linking -lmpicxx, which we do not need, and cannot use on our Cray-EX
-RUN sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /opt/local/mpich-3.4.3-cuda/bin/mpicxx
+RUN sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /opt/local/mpich-${MPICH_VERSION}-cuda/bin/mpicxx
 
-RUN whoami && module avail \
-    && module load mpich/3.4.3-ofi-cuda && module list \
+RUN echo "Installing MPI benchmark applications" \
+    && whoami && module avail \
+    && module load mpich/${MPICH_VERSION}-ofi-cuda && module list \
     && sh /home/plainuser/install_benchmarks.sh
 
 # Local Variables:
