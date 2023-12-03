@@ -16,7 +16,7 @@ RUN echo "yum/dnf config" \
     && adduser plainuser \
     && chmod a+rx /usr/bin/docker-clean && docker-clean \
     && yum -y update \
-    && yum -y install which git tar curl xz \
+    && yum -y install which git tar curl xz bzip2 patch \
     && yum -y install http://repos.openhpc.community/OpenHPC/2/EL_8/x86_64/ohpc-release-2-1.el8.x86_64.rpm \
     && yum -y install dnf-plugins-core \
     && yum config-manager --set-enabled powertools \
@@ -28,18 +28,25 @@ RUN echo "yum/dnf config" \
     && yum -y install lmod-defaults-${COMPILER_VERSION}-${MPI_FAMILY_VARIANT}-ohpc \
     && docker-clean
 
+# Prevent mpicxx from linking -lmpicxx, which we do not need, and cannot use on our Cray-EX
+RUN sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /opt/ohpc/pub/mpi/${MPI_FAMILY_VARIANT}-${COMPILER_VERSION}-ohpc/3.4.2/bin/mpicxx
+
+#---------------------------------------------------------
+# we now have a fully functional OpenHPC+MPI image,
+# however it does not support CUDA.  let's add to it
+# and install a similarly-versioned MPI that is cuda-aware
+#---------------------------------------------------------
+
 # https://developer.nvidia.com/cuda-11-7-1-download-archive
 RUN echo "Cuda" \
     && curl -O https://developer.download.nvidia.com/compute/cuda/11.7.1/local_installers/cuda-repo-rhel8-11-7-local-11.7.1_515.65.01-1.x86_64.rpm \
     && rpm -i cuda-repo-rhel8-11-7-local-11.7.1_515.65.01-1.x86_64.rpm && rm -f cuda-repo-rhel8-11-7-local-11.7.1_515.65.01-1.x86_64.rpm \
-    && dnf -y module install nvidia-driver:latest-dkms \
     && dnf -y install cuda \
     && echo "RDMA prereqs" \
     && yum -y install libibverbs-devel libpsm2-devel \
+    && echo "Minimal Python3 & tools to bootstrap MPICH" \
+    && yum -y install python3 \
     && docker-clean
-
-# Prevent mpicxx from linking -lmpicxx, which we do not need, and cannot use on our Cray-EX
-RUN sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /opt/ohpc/pub/mpi/${MPI_FAMILY_VARIANT}-${COMPILER_VERSION}-ohpc/3.4.2/bin/mpicxx
 
 RUN mkdir /opt/ohpc/pub/moduledeps/${COMPILER_VERSION}/cuda
 COPY extras/cuda-11.7 /opt/ohpc/pub/moduledeps/${COMPILER_VERSION}/cuda/11.7
@@ -71,7 +78,7 @@ RUN whoami && module avail \
 RUN sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /opt/local/mpich-3.4.3-cuda/bin/mpicxx
 
 RUN whoami && module avail \
-    && module load mpich/3.4.3-ofi-cuda cuda && module list \
+    && module load mpich/3.4.3-ofi-cuda && module list \
     && sh /home/plainuser/install_benchmarks.sh
 
 # Local Variables:
