@@ -32,9 +32,16 @@ RUN echo "yum/dnf config" \
 # Prevent mpicxx from linking -lmpicxx, which we do not need, and cannot use on our Cray-EX
 RUN sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /opt/ohpc/pub/mpi/${MPI_FAMILY_VARIANT}-${COMPILER_VERSION}-ohpc/3.4.2/bin/mpicxx
 
+RUN mkdir -p /opt/local \
+    && chown -R plainuser: /home/plainuser/ /opt/local
+
+COPY extras/hello_world_mpi.C /home/plainuser/
+
+USER plainuser
+SHELL ["/bin/bash", "-lc"]
+
 RUN echo "Installing MPI benchmark applications" \
-    && whoami && module avail \
-    && module load mpich/${MPICH_VERSION}-ofi-cuda && module list \
+    && whoami && module avail && module list \
     && echo "OSU:" \
     && cd /tmp && curl -Sl https://mvapich.cse.ohio-state.edu/download/mvapich/osu-micro-benchmarks-${OSU_VERSION}.tar.gz | tar xz \
     && cd osu-micro-benchmarks-${OSU_VERSION} \
