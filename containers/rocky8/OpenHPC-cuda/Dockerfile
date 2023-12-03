@@ -10,6 +10,7 @@ ARG COMPILER_VERSION=gnu9
 ARG MPI_FAMILY=mpich
 ARG MPI_FAMILY_VARIANT=mpich-ofi
 ARG MPICH_VERSION=3.4.3
+ARG OSU_VERSION=7.2
 
 # Basic OpenHPC development environment setup, derived from Install_guide-Rocky8-Warewulf-SLURM-2.4
 RUN echo "yum/dnf config" \
@@ -55,7 +56,6 @@ COPY extras/mpich-${MPICH_VERSION}-ofi-cuda /opt/ohpc/pub/moduledeps/${COMPILER_
 
 COPY extras/hello_world_mpi.C /home/plainuser/
 COPY extras/bootstrap_libmesh.sh /home/plainuser/
-COPY extras/install_benchmarks.sh /home/plainuser/
 
 RUN mkdir -p /opt/local \
     && chown -R plainuser: /home/plainuser/ /opt/local
@@ -82,7 +82,28 @@ RUN sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /opt/local/mpich-${MPIC
 RUN echo "Installing MPI benchmark applications" \
     && whoami && module avail \
     && module load mpich/${MPICH_VERSION}-ofi-cuda && module list \
-    && sh /home/plainuser/install_benchmarks.sh
+    && echo "OSU:" \
+    && cd /tmp && curl -Sl  https://mvapich.cse.ohio-state.edu/download/mvapich/osu-micro-benchmarks-${OSU_VERSION}.tar.gz | tar xz \
+    && cd osu-micro-benchmarks-${OSU_VERSION} \
+    && ./configure --prefix=/opt/local/osu-micro-benchmarks-${OSU_VERSION} \
+                   CXX=$(which mpicxx) CC=$(which mpicc) FC=$(which mpif90) F77=$(which mpif77) LIBS="-L${CUDA_HOME}/targets/x86_64-linux/lib -lcudart" \
+                   --enable-cuda --with-cuda=${CUDA_HOME} \
+    && make -j 8 V=0 && make install \
+    && cd && rm -rf /tmp/osu-micro-benchmarks-${OSU_VERSION} \
+    && cd /opt/local && mpicxx -o hello_world_mpi /home/plainuser/hello_world_mpi.C -fopenmp \
+    && echo "IMB:" \
+    && cd /opt/local && git clone https://github.com/intel/mpi-benchmarks.git imb-2021.3 \
+    && cd /opt/local/imb-2021.3 && git checkout 8ba5d968272b6e7b384f91b6597d1c4590faf3db \
+    && CXX=$(which mpicxx) CC=$(which mpicc) make \
+    && make -C src_cpp -f Makefile TARGET=MPI1 clean \
+    && make -C src_cpp -f Makefile TARGET=NBC clean\
+    && make -C src_cpp -f Makefile TARGET=RMA clean \
+    && make -C src_cpp -f Makefile TARGET=EXT clean \
+    && make -C src_cpp -f Makefile TARGET=IO clean \
+    && make -C src_cpp -f Makefile TARGET=MT clean \
+    && make -C src_c/P2P -f Makefile TARGET=P2P clean \
+    && make -C src_cpp -f Makefile TARGET=MPI1 clean GPU_ENABLE=1
+
 
 # Local Variables:
 # mode: sh
