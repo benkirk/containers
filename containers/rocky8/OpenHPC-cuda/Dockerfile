@@ -9,7 +9,7 @@ ADD extras/docker-clean /usr/bin/docker-clean
 ARG COMPILER_VERSION=gnu9
 ARG MPI_FAMILY=mpich
 ARG MPI_FAMILY_VARIANT=mpich-ofi
-ARG MPICH_VERSION=${MPICH_VERSION}
+ARG MPICH_VERSION=3.4.3
 
 # Basic OpenHPC development environment setup, derived from Install_guide-Rocky8-Warewulf-SLURM-2.4
 RUN echo "yum/dnf config" \
