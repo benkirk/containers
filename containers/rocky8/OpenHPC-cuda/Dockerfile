@@ -59,11 +59,6 @@ RUN echo "Installing MPI benchmark applications" \
     && cd /opt/local && mpicxx -o hello_world_mpi /home/plainuser/hello_world_mpi.C -fopenmp \
     && docker-clean
 
-# target remove:
-# nsight-compute-2022.2.1
-# nsight-systems-2022.1.3
-# libnpp libnpp-devel
-
 # Local Variables:
 # mode: sh
 # End:
