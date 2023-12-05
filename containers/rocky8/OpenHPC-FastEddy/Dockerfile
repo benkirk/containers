@@ -7,6 +7,8 @@ USER root
 RUN echo "netcdf: serial netcdf from the base OS" \
     && yum -y install \
            netcdf-devel \
+    && echo "removing unnecessary NVIDIA components to shrink container image" \
+    && rm -rf /opt/local/nvidia /usr/local/cuda-11.7/targets/x86_64-linux/lib/*_static.a \
     && docker-clean
 
 USER plainuser

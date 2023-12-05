@@ -20,6 +20,7 @@ RUN echo "Cuda" \
 RUN mkdir /opt/ohpc/pub/moduledeps/${COMPILER_VERSION}/cuda
 COPY extras/cuda-11.7 /opt/ohpc/pub/moduledeps/${COMPILER_VERSION}/cuda/11.7
 COPY extras/mpich-${MPICH_VERSION}-ofi-cuda /opt/ohpc/pub/moduledeps/${COMPILER_VERSION}/mpich/${MPICH_VERSION}-ofi-cuda
+COPY extras/hello_world.cu /home/plainuser
 
 RUN mkdir -p /opt/local \
     && chown -R plainuser: /home/plainuser/ /opt/local
@@ -29,6 +30,7 @@ SHELL ["/bin/bash", "-lc"]
 
 RUN whoami && module avail \
     && module load -mpich +hwloc +libfabric +cuda && module list \
+    && cd /opt/local && nvcc -o hello_cuda /home/plainuser/hello_world.cu --cudart shared \
     && cd /tmp && curl -sSL https://www.mpich.org/static/downloads/${MPICH_VERSION}/mpich-${MPICH_VERSION}.tar.gz | tar xz \
     && cd mpich-${MPICH_VERSION} \
     && ./configure --help \
