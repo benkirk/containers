@@ -1,8 +1,5 @@
 FROM docker.io/rockylinux/rockylinux:8
 
-########################################
-# Add docker-clean
-########################################
 ADD extras/docker-clean /usr/bin/docker-clean
 
 ARG COMPILER_VERSION=gnu9
