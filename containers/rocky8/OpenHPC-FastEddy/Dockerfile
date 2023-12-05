@@ -13,7 +13,6 @@ RUN echo "netcdf: serial netcdf from the base OS" \
 
 USER plainuser
 RUN echo "FastEddy - source" \
-    && whoami && module avail && module load mpich/${MPICH_VERSION}-ofi-cuda && module list \
     && cd /opt/local && git clone https://github.com/NCAR/FastEddy-model.git && git clone https://github.com/NCAR/FastEddy-tutorials.git \
     && cd FastEddy-model/SRC/FEMAIN \
     && sed -i 's/TEST_LIBS = -lm -lmpi -lstdc++ -lcurand/TEST_LIBS = -lm -lmpi -lstdc++ $(LIBS)/g' Makefile \
@@ -21,7 +20,7 @@ RUN echo "FastEddy - source" \
     && docker-clean
 
 RUN echo "FastEddy - build" \
-    && whoami && module avail && module load mpich/${MPICH_VERSION}-ofi-cuda && module list \
+    && module avail && module load mpich/${MPICH_VERSION}-ofi-cuda && module list \
     && cd /opt/local/FastEddy-model/SRC && fe_inc= && for d in */ */*/ ; do fe_inc="-I$(pwd)/${d} ${fe_inc}" ; done \
     && cd FEMAIN && make \
                         INCLUDES="${fe_inc} -I${MPI_DIR}/include/ -I${CUDA_HOME}/targets/x86_64-linux/include/" \
