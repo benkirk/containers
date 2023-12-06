@@ -16,7 +16,7 @@ RUN echo "FastEddy - source" \
     && cd /opt/local && git clone https://github.com/NCAR/FastEddy-model.git && git clone https://github.com/NCAR/FastEddy-tutorials.git \
     && cd FastEddy-model/SRC/FEMAIN \
     && sed -i 's/TEST_LIBS = -lm -lmpi -lstdc++ -lcurand/TEST_LIBS = -lm -lmpi -lstdc++ $(LIBS)/g' Makefile \
-    && sed -i 's/TEST_CU_LIBS = -lm -lmpi -lcurand/TEST_LIBS = -lm -lmpi $(LIBS)/g' Makefile \
+    && sed -i 's/TEST_CU_LIBS = -lm -lmpi -lcurand/TEST_CU_LIBS = -lm -lmpi $(LIBS)/g' Makefile \
     && docker-clean
 
 RUN echo "FastEddy - build" \
