@@ -32,22 +32,41 @@ RUN mkdir -p /container/miniconda3 \
 USER plainuser
 SHELL ["/bin/bash", "-lc"]
 
+# RUN source /container/conda.cfg \
+#     && conda config --add channels conda-forge \
+#     && export CONDA_OVERRIDE_CUDA=${CUDA_VERSION} \
+#     && conda create --yes \
+#              --prefix /container/${CONDA_ENV} \
+#              python==3.10.* pip \
+#              tensorflow-gpu cuda-version=${CUDA_VERSION} cudatoolkit=${CUDA_VERSION}.* \
+#              numpy scipy matplotlib pandas \
+#              pydoe \
+#     && docker-clean
+#
+# RUN source /container/conda.cfg \
+#     && conda activate /container/${CONDA_ENV} \
+#     && pip install jaxlib 'jax[cuda11_local]' -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html \
+#     && docker-clean
+
 RUN source /container/conda.cfg \
     && conda config --add channels conda-forge \
-    && export CONDA_OVERRIDE_CUDA=${CUDA_VERSION} \
     && conda create --yes \
              --prefix /container/${CONDA_ENV} \
              python==3.10.* pip \
-             tensorflow-gpu cuda-version=${CUDA_VERSION} cudatoolkit=${CUDA_VERSION}.* \
              numpy scipy matplotlib pandas \
              pydoe \
     && docker-clean
 
 RUN source /container/conda.cfg \
     && conda activate /container/${CONDA_ENV} \
-    && pip install jaxlib 'jax[cuda11_local]' -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html \
+    && pip install \
+           'tensorflow[and-cuda]' \
+           jaxlib 'jax[cuda12_pip]' -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html \
     && docker-clean
 
+COPY test_tf+jax_install.py /container/test_tf+jax_install.py
+
+RUN /container/${CONDA_ENV}/bin/python /container/test_tf+jax_install.py
 
 # Local Variables:
 # mode: sh
