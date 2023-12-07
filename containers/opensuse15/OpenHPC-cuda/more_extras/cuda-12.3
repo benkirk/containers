@@ -1,0 +1,20 @@
+#%Module1.0#####################################################################
+
+proc ModulesHelp { } {
+
+puts stderr " "
+puts stderr "This module loads the cuda library (cuda aware) built with the gnu12 toolchain."
+puts stderr "\nVersion 12.3\n"
+
+}
+module-whatis "Name: cuda"
+module-whatis "Version: 12.3"
+module-whatis "Category: runtime library"
+module-whatis "Description: CUDA implementation"
+
+set     version			    12.3
+
+setenv		CUDA_HOME	    /usr/local/cuda-12.3
+setenv		CUDA_DIR	    /usr/local/cuda-12.3
+prepend-path	PATH		    /usr/local/cuda-12.3/bin
+prepend-path    LD_LIBRARY_PATH     /usr/local/cuda-12.3/lib64:/usr/local/cuda-12.3/nvvm/lib64:/usr/local/cuda-12.3/extras/CUPTI/lib64:/usr/local/cuda-12.3/extras/Debugger/lib64
