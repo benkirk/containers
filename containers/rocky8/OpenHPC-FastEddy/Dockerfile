@@ -1,4 +1,4 @@
-FROM benjaminkirk/rocky8-openhpc-cuda:latest
+FROM benjaminkirk/rocky8-openhpc-mpich-cuda:latest
 
 ARG MPICH_VERSION=3.4.3
 
