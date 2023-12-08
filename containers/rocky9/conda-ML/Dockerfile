@@ -7,7 +7,6 @@ ENV CONDA_ENV=${CONDA_ENV}
 
 ADD extras/docker-clean /usr/bin/docker-clean
 
-# Basic OpenHPC development environment setup, derived from Install_guide-Rocky8-Warewulf-SLURM-2.4
 RUN echo "yum/dnf config" \
     && set -x \
     && adduser plainuser \
@@ -20,6 +19,16 @@ RUN echo "yum/dnf config" \
 #     && curl -O https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/cuda-repo-rhel9-11-8-local-11.8.0_520.61.05-1.x86_64.rpm \
 #     && rpm -i cuda-repo-rhel9-11-8-local-11.8.0_520.61.05-1.x86_64.rpm && rm -f cuda-repo-rhel9-11-8-local-11.8.0_520.61.05-1.x86_64.rpm \
 #     && dnf -y install cuda && rm /var/cuda-repo-*/*.rpm && dnf config-manager --disable cuda-rhel9-11-8-local \
+#     && echo "removing unnecessary NVIDIA components to shrink container image" \
+#     && rm -rf /opt/local/nvidia /usr/local/cuda-*/targets/x86_64-linux/lib/*_static.a \
+#     && docker-clean
+
+# RUN echo "Cuda" \
+#     && curl -O https://developer.download.nvidia.com/compute/cuda/12.3.1/local_installers/cuda-repo-rhel9-12-3-local-12.3.1_545.23.08-1.x86_64.rpm \
+#     && rpm -i cuda-repo-rhel9-12-3-local-12.3.1_545.23.08-1.x86_64.rpm && rm -f cuda-repo-rhel9-12-3-local-12.3.1_545.23.08-1.x86_64.rpm \
+#     && dnf -y install cuda && rm /var/cuda-repo-*/*.rpm && dnf config-manager --disable cuda-rhel9-12-3-local  \
+#     && echo "removing unnecessary NVIDIA components to shrink container image" \
+#     && rm -rf /opt/local/nvidia /usr/local/cuda-12.3/targets/x86_64-linux/lib/*_static.a \
 #     && docker-clean
 
 RUN mkdir -p /container/miniconda3 \
@@ -60,8 +69,8 @@ RUN source /container/conda.cfg \
 RUN source /container/conda.cfg \
     && conda activate /container/${CONDA_ENV} \
     && pip install \
-           'tensorflow[and-cuda]' \
-           jaxlib 'jax[cuda12_pip]' -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html \
+           'tensorflow' \
+           jaxlib 'jax[cuda11_local]' -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html \
     && docker-clean
 
 COPY test_tf+jax_install.py /container/test_tf+jax_install.py
