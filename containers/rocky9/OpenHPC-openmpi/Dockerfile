@@ -3,9 +3,8 @@ FROM docker.io/rockylinux/rockylinux:9
 ADD extras/docker-clean /usr/bin/docker-clean
 
 ARG COMPILER_VERSION=gnu12
-ARG MPI_FAMILY=mpich
-ARG MPI_FAMILY_VARIANT=mpich-ofi
-ARG MPICH_VERSION=3.4.3
+ARG MPI_FAMILY=openmpi4
+ARG MPI_FAMILY_VARIANT=openmpi4
 ARG OSU_VERSION=7.2
 
 # Basic OpenHPC development environment setup, derived from Install_guide-Rocky8-Warewulf-SLURM-2.4
@@ -24,9 +23,6 @@ RUN echo "yum/dnf config" \
     && yum -y install ${MPI_FAMILY_VARIANT}-${COMPILER_VERSION}-ohpc \
     && yum -y install lmod-defaults-${COMPILER_VERSION}-${MPI_FAMILY_VARIANT}-ohpc \
     && docker-clean
-
-# Prevent mpicxx from linking -lmpicxx, which we do not need, and cannot use on our Cray-EX
-RUN sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /opt/ohpc/pub/mpi/${MPI_FAMILY_VARIANT}-${COMPILER_VERSION}-ohpc/${MPICH_VERSION}/bin/mpicxx
 
 RUN mkdir -p /opt/local \
     && chown -R plainuser: /home/plainuser/ /opt/local
