@@ -14,12 +14,12 @@ RUN echo "yum/dnf config" \
     && adduser plainuser \
     && chmod a+rx /usr/bin/docker-clean && docker-clean \
     && yum -y update \
-    && yum -y install --allowerasing which git tar curl xz bzip2 patch \
+    && yum -y install --allowerasing which git tar curl xz bzip2 \
     && yum -y install http://repos.openhpc.community/OpenHPC/3/EL_9/x86_64/ohpc-release-3-1.el9.x86_64.rpm \
     && yum -y install dnf-plugins-core \
     && yum -y config-manager --set-enabled crb \
     && yum -y install ohpc-base \
-    && yum -y install lmod-ohpc ohpc-autotools valgrind-ohpc \
+    && yum -y install lmod-ohpc ohpc-autotools \
     && yum -y install ${COMPILER_VERSION}-compilers-ohpc \
     && yum -y install ${MPI_FAMILY_VARIANT}-${COMPILER_VERSION}-ohpc \
     && yum -y install lmod-defaults-${COMPILER_VERSION}-${MPI_FAMILY_VARIANT}-ohpc \

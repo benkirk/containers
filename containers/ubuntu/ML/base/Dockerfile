@@ -19,11 +19,11 @@ RUN cd /tmp \
     && rm -rf \
           /usr/local/cuda-*/nsight-*/ \
           /usr/local/cuda-*/nsightee_plugins/ \
-          /usr/local/cuda-*/libnvvp/ \
           /usr/local/cuda-*/compute-sanitizer/ \
-    && find /usr/local/cuda-*/ -name "*_static.a"  | xargs rm -f \
     && echo "Done." \
     && docker-clean
+
+#     && find /usr/local/cuda-*/ -name "*_static.a"  | xargs rm -f \
 
 # Local Variables:
 # mode: sh

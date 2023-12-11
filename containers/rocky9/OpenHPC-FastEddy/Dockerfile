@@ -8,7 +8,11 @@ RUN echo "netcdf: serial netcdf from the base OS" \
     && yum -y install \
            netcdf-devel \
     && echo "removing unnecessary NVIDIA components to shrink container image" \
-    && rm -rf /opt/local/nvidia /usr/local/cuda-12.3/targets/x86_64-linux/lib/*_static.a \
+    && rm -rf \
+          /opt/local/nvidia \
+          /usr/local/cuda-*.*/nsightee_plugins/ \
+          /usr/local/cuda-*.*/compute-sanitizer/ \
+    && find /usr/local/cuda-*.*/ -name "*_static.a"  | xargs rm -f \
     && docker-clean
 
 USER plainuser
@@ -20,7 +24,7 @@ RUN echo "FastEddy - source" \
     && docker-clean
 
 RUN echo "FastEddy - build" \
-    && module avail && module load mpich/${MPICH_VERSION}-ofi-cuda && module list \
+    && module list \
     && cd /opt/local/FastEddy-model/SRC && fe_inc= && for d in */ */*/ ; do fe_inc="-I$(pwd)/${d} ${fe_inc}" ; done \
     && cd FEMAIN && make \
                         INCLUDES="${fe_inc} -I${MPI_DIR}/include/ -I${CUDA_HOME}/targets/x86_64-linux/include/" \

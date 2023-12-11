@@ -13,13 +13,16 @@ RUN echo "Cuda" \
     && rpm -i cuda-repo-rhel9-12-3-local-12.3.1_545.23.08-1.x86_64.rpm && rm -f cuda-repo-rhel9-12-3-local-12.3.1_545.23.08-1.x86_64.rpm \
     && dnf -y install cuda && rm /var/cuda-repo-*/*.rpm && dnf config-manager --disable cuda-rhel9-12-3-local \
     && echo "MPICH build prereqs" \
-    && dnf -y install libibverbs-devel libpsm2-devel hwloc-ohpc \
+    && dnf -y install libibverbs-devel libpsm2-devel \
+           hwloc-ohpc valgrind-ohpc \
     && docker-clean
 
 RUN mkdir /opt/ohpc/pub/moduledeps/${COMPILER_VERSION}/cuda
 COPY extras/cuda-12.3 /opt/ohpc/pub/moduledeps/${COMPILER_VERSION}/cuda/12.3
 COPY extras/mpich-${MPICH_VERSION}-ofi-cuda /opt/ohpc/pub/moduledeps/${COMPILER_VERSION}/mpich/${MPICH_VERSION}-ofi-cuda
 COPY extras/hello_world.cu /home/plainuser
+
+RUN ln -sf /opt/ohpc/pub/moduledeps/${COMPILER_VERSION}/mpich/${MPICH_VERSION}-ofi-cuda /opt/ohpc/pub/moduledeps/${COMPILER_VERSION}/mpich/default
 
 RUN mkdir -p /opt/local \
     && chown -R plainuser: /home/plainuser/ /opt/local
