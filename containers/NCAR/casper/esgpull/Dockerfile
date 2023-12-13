@@ -54,17 +54,15 @@ RUN echo "installing esgpull (2 of 2)" \
     && esgpull search project:CMIP6 variable_id:tas experiment_id:'ssp*' member_id:r1i1p1f1 frequency:mon --detail 0 \
     && esgpull config \
     && mkdir -p ${ESGPULL_INST_PATH}/etc \
-    && cd ${ESGPULL_INST_PATH} \
-    && mv config.toml config_container.toml \
-    && cp config_container.toml config_host.toml \
-    && sed -i 's/container/host/g' config_host.toml \
-    && ln -s config_container.toml config.toml
+    && cd ${ESGPULL_INST_PATH}
 
 #COPY extras/esgf_credentials ${ESGPULL_INST_PATH}/etc/
 
 ENV ESGPULL_CONDA_ENV="${ESGPULL_CONDA_ENV}"
 ENV ESGPULL_INST_PATH="${ESGPULL_INST_PATH}"
 ENV CONDA_INIT="/container/init-conda.sh"
+
+COPY extras/esgpull_self_install.sh /usr/bin/esgpull_self_install.sh
 
 # Local Variables:
 # mode: sh
