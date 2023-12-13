@@ -5,7 +5,7 @@ this_dir   := $(shell pwd)
 label      ?= $(shell echo $(subst /,-,$(subst $(top_dir)/containers/,,$(this_dir))) | tr A-Z a-z)
 git_commit := $(shell git log --max-count=1 --oneline --abbrev=7 $(this_dir) 2>/dev/null | cut -d' ' -f1)
 version    ?= $(shell cat ./Version 2>/dev/null || echo "devel"-$(git_commit))
-
+datestamp  := $(shell date +%y.%m)
 dockerprog    ?= $(shell which docker 2>/dev/null || which podman 2>/dev/null || echo "notfound")
 dockerhubroot ?= benjaminkirk
 
@@ -23,6 +23,7 @@ echo:
 	@printf "# %s:\t\t %s\n"   "this_dir"       $(this_dir)
 	@printf "# %s:\t\t %s\n" "label"          $(label)
 	@printf "# %s:\t\t %s\n"   "version"        $(version)
+	@printf "# %s:\t\t %s\n"   "datestamp"      $(datestamp)
 	@printf "# %s:\t\t %s\n"   "git commit"     $(git_commit)
 	@printf "# %s:\t\t %s\n"   "image tag"      $$($(MAKE) echo_tag)
 	@printf "# %s\n" "-------------------------------------------------------------"
@@ -35,6 +36,7 @@ image: .buildstamp
 
 .buildstamp: Makefile Dockerfile extras
 	$(dockerprog) build $(DOCKER_BUILD_ARGS) --build-arg DOCKERHUB_ROOT=$(dockerhubroot) --tag $(image_tag) .
+	$(dockerprog) tag  $(dockerhubroot)/$(label):$(version) $(dockerhubroot)/$(label):$(datestamp)
 	$(dockerprog) tag  $(dockerhubroot)/$(label):$(version) $(dockerhubroot)/$(label):latest
 	date > $@
 
@@ -60,6 +62,7 @@ exec:
 
 push: image
 	$(dockerprog) push $(dockerhubroot)/$(label):$(version)
+	$(dockerprog) push $(dockerhubroot)/$(label):$(datestamp)
 	$(dockerprog) push $(dockerhubroot)/$(label):latest
 
 pull: Makefile
