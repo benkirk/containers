@@ -16,11 +16,20 @@ conffile="${HOME}/.config/esgpull/installs.json"
 esgpull --version
 esgpull self install -n host ${ESGPULL_INST_PATH}
 
+# use the "local" LLNL node as primary
 esgpull config api.index_node "esgf-node.llnl.gov"
 
-esgpull config paths.data "/glade/derecho/scratch/benkirk/esgpull_repo"
-
+# increase concurrent downloads
 esgpull config download.max_concurrent 12
+
+# configure the data and download tmp paths.
+# (best to have these on the same file system so that tmp -> data mvs are just relinks.)
+esgpull config paths.data  "/glade/derecho/scratch/benkirk/esgpull_repo"
+esgpull config paths.tmp   "/glade/derecho/scratch/benkirk/esgpull_repo/.tmp"
+
+# override some defaults - use distributed & replicated sources by default.
+esgpull config api.default_options.distrib "true"
+esgpull config api.default_options.replica "true"
 
 echo 'y' | esgpull config --generate
 
