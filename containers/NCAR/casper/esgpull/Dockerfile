@@ -48,7 +48,12 @@ RUN echo "installing esgpull (2 of 2)" \
     && esgpull --version \
     && esgpull self install -n default ${ESGPULL_INST_PATH} \
     && esgpull config api.index_node esgf-node.llnl.gov \
+    && esgpull config api.page_limit 1000 \
+    && esgpull config download.max_concurrent 12 \
     && esgpull config paths.data /glade/collections/cmpipfoo/ \
+    && esgpull config paths.tmp /glade/collections/cmpipfoo/.tmp/ \
+    && esgpull config api.default_options.distrib "true" \
+    && esgpull config api.default_options.replica "true" \
     && echo 'y' | esgpull config --generate \
     && esgpull search project:CMIP6 variable_id:tas experiment_id:'ssp*' member_id:r1i1p1f1 frequency:mon --detail 0 \
     && esgpull config \

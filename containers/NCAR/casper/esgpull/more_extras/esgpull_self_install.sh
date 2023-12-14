@@ -19,6 +19,9 @@ esgpull self install -n host ${ESGPULL_INST_PATH}
 # use the "local" LLNL node as primary
 esgpull config api.index_node "esgf-node.llnl.gov"
 
+# increase the search API page limit (amount of results transmitted per request).
+esgpull config api.page_limit 1000
+
 # increase concurrent downloads
 esgpull config download.max_concurrent 12
 
