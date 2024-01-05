@@ -3,7 +3,7 @@ FROM benjaminkirk/ncar-casper-site_customizations:latest
 RUN echo "zypper install of additional GUI tools" \
     && set -x \
     && zypper -n install \
-              gimp \
+              gimp iso-codes \
               vlc vlc-qt vlc-vdpau \
               smplayer \
               gv eog evince evince-plugin-pdfdocument geeqie qpdfview \
