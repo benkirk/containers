@@ -16,7 +16,7 @@ RUN echo "zypper install of additional editors" \
     && zypper -n install \
               emacs emacs-x11 xemacs \
               vim gvim neovim neovim-gtk \
-              nedit \
+              nedit gedit \
     && docker-clean
 
 # Local Variables:
