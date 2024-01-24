@@ -19,6 +19,13 @@ RUN echo "zypper install of additional editors" \
               nedit gedit \
     && docker-clean
 
+RUN echo "zypper install of visual diff tools" \
+    && set -x \
+    && zypper -n install \
+              meld \
+              tkdiff \
+    && docker-clean
+
 # Local Variables:
 # mode: sh
 # End:
