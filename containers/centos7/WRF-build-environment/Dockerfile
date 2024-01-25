@@ -12,16 +12,18 @@ ADD extras/docker-clean /usr/bin/docker-clean
 # Set up base OS environment
 RUN echo "base OS environment" \
     && yum -y update \
-    && yum -y install scl file gcc gcc-gfortran gcc-c++ glibc.i686 libgcc.i686 libpng-devel jasper \
+    && yum -y install file gcc gcc-gfortran gcc-c++ glibc.i686 libgcc.i686 libpng-devel jasper \
            jasper-devel hostname m4 make perl tar bash tcsh time wget which zlib zlib-devel \
-           openssh-clients openssh-server net-tools fontconfig libgfortran libXext libXrender \
-           ImageMagick sudo epel-release git \
+           openssh-clients openssh-server net-tools fontconfig libgfortran libXext libXrender ImageMagick sudo epel-release \
+    && yum -y install netcdf netcdf-devel netcdf-fortran netcdf-fortran-devel \
+           hdf5 hdf5-devel \
+           grib_api grib_api-devel \
+           wgrib wgrib2 \
     && docker-clean
 
 
-ENV DEVTOOLSET devtoolset-8
-
 # Newer version of GNU compiler, required for WRF 2003 and 2008 Fortran constructs
+ENV DEVTOOLSET devtoolset-8
 RUN echo "Update gcc" \
     && yum -y install centos-release-scl \
     && yum -y install ${DEVTOOLSET} \
@@ -36,9 +38,7 @@ RUN echo "Update gcc" \
 #  &&  chown -R wrfuser:wrf /wrf \
 #  &&  chmod 6755 /wrf
 
-# # Build the libraries with a parallel Make
-
-
+# Build the libraries with a parallel Make
 ENV J 4
 
 # create config_env.sh stub, then add to it later
@@ -69,51 +69,55 @@ RUN mkdir -p /opt/local \
 RUN whoami && cd /opt/local \
     && sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /opt/local/mpich-3.4.3/install/bin/mpicxx
 
+# Download NCL
+ENV NCARG_ROOT /usr/local
+RUN curl -SL https://www.earthsystemgrid.org/api/v1/dataset/ncl.630.1/file/ncl_ncarg-6.3.0.Linux_CentOS7.0_x86_64_nodap_gcc482.tar.gz | tar zxC ${NCARG_ROOT}
 
-# Build HDF5 libraries
-RUN mkdir -p /wrf/libs/hdf5/BUILD_DIR \
-    && source /opt/local/config_env.sh \
-    && cd /wrf/libs/hdf5/BUILD_DIR \
-    && git clone https://github.com/HDFGroup/hdf5.git \
-    && cd hdf5 \
-    && git checkout hdf5_1_10_11 \
-    && ./configure --enable-fortran --enable-cxx --prefix=/usr/local/ \
-        CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
-    && make install \
-    && rm -rf /wrf/libs/hdf5/BUILD_DIR \
-    && docker-clean
 
-ENV LD_LIBRARY_PATH /usr/local/lib
+# # Build HDF5 libraries
+# RUN mkdir -p /wrf/libs/hdf5/BUILD_DIR \
+#     && source /opt/local/config_env.sh \
+#     && cd /wrf/libs/hdf5/BUILD_DIR \
+#     && git clone https://github.com/HDFGroup/hdf5.git \
+#     && cd hdf5 \
+#     && git checkout hdf5_1_10_11 \
+#     && ./configure --enable-fortran --enable-cxx --prefix=/usr/local/ \
+#         CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
+#     && make install \
+#     && rm -rf /wrf/libs/hdf5/BUILD_DIR \
+#     && docker-clean
 
-# Build netCDF C and Fortran libraries
-RUN yum -y install libcurl-devel zlib-devel \
-    && docker-clean
+# ENV LD_LIBRARY_PATH /usr/local/lib
 
-ENV NETCDF /wrf/libs/netcdf
+# # Build netCDF C and Fortran libraries
+# RUN yum -y install libcurl-devel zlib-devel \
+#     && docker-clean
 
-RUN mkdir -p ${NETCDF}/BUILD_DIR \
-    && source /opt/local/config_env.sh \
-    && cd ${NETCDF}/BUILD_DIR \
-    && curl -L -O https://github.com/Unidata/netcdf-c/archive/v4.6.2.tar.gz \
-    && curl -L -O https://github.com/Unidata/netcdf-fortran/archive/v4.4.5.tar.gz \
-    && tar -xf v4.6.2.tar.gz \
-    && cd netcdf-c-4.6.2 \
-    && ./configure \
-           --prefix="${NETCDF}" \
-           CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
-    && make install \
-    && env | sort | uniq \
-    && cd ${NETCDF}/BUILD_DIR \
-    && tar -xf v4.4.5.tar.gz \
-    && cd netcdf-fortran-4.4.5/ \
-    && export LD_LIBRARY_PATH=${NETCDF}/lib:${LD_LIBRARY_PATH} \
-    && echo "LD_LIBRARY_PATH=${NETCDF}/lib:${LD_LIBRARY_PATH}" >> /opt/local/config_env.sh \
-    && CPPFLAGS="-I${NETCDF}/include" LDFLAGS="-L${NETCDF}/lib" \
-               ./configure \
-               --prefix="${NETCDF}" \
-               CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
-    && make install \
-    && rm -rf ${NETCDF}/BUILD_DIR
+# ENV NETCDF /wrf/libs/netcdf
+
+# RUN mkdir -p ${NETCDF}/BUILD_DIR \
+#     && source /opt/local/config_env.sh \
+#     && cd ${NETCDF}/BUILD_DIR \
+#     && curl -L -O https://github.com/Unidata/netcdf-c/archive/v4.6.2.tar.gz \
+#     && curl -L -O https://github.com/Unidata/netcdf-fortran/archive/v4.4.5.tar.gz \
+#     && tar -xf v4.6.2.tar.gz \
+#     && cd netcdf-c-4.6.2 \
+#     && ./configure \
+#            --prefix="${NETCDF}" \
+#            CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
+#     && make install \
+#     && env | sort | uniq \
+#     && cd ${NETCDF}/BUILD_DIR \
+#     && tar -xf v4.4.5.tar.gz \
+#     && cd netcdf-fortran-4.4.5/ \
+#     && export LD_LIBRARY_PATH=${NETCDF}/lib:${LD_LIBRARY_PATH} \
+#     && echo "LD_LIBRARY_PATH=${NETCDF}/lib:${LD_LIBRARY_PATH}" >> /opt/local/config_env.sh \
+#     && CPPFLAGS="-I${NETCDF}/include" LDFLAGS="-L${NETCDF}/lib" \
+#                ./configure \
+#                --prefix="${NETCDF}" \
+#                CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
+#     && make install \
+#     && rm -rf ${NETCDF}/BUILD_DIR
 
 
 # RUN mkdir -p /var/run/sshd \
@@ -126,9 +130,6 @@ RUN mkdir -p ${NETCDF}/BUILD_DIR \
 #  &&  chown -R wrfuser:wrf /wrf /wrf/WPS_GEOG /wrf/wrfinput /wrf/wrfoutput /usr/local \
 #  &&  chmod 6755 /wrf /wrf/WPS_GEOG /wrf/wrfinput /wrf/wrfoutput /usr/local
 
-# Download NCL
-ENV NCARG_ROOT /usr/local
-RUN curl -SL https://www.earthsystemgrid.org/api/v1/dataset/ncl.630.1/file/ncl_ncarg-6.3.0.Linux_CentOS7.0_x86_64_nodap_gcc482.tar.gz | tar zxC ${NCARG_ROOT}
 
 # # Set environment for interactive container shells
 # RUN echo export LDFLAGS="-lm" >> /etc/bashrc \
