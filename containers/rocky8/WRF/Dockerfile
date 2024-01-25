@@ -1,10 +1,7 @@
 FROM benjaminkirk/rocky8-wrf-build-environment:latest
 
-ARG WRF_VERSION 4.4.2
-ARG WPS_VERSION 4.3.1
-
-ENV WRF_VERSION ${WRF_VERSION}
-ENV WPS_VERSION ${WPS_VERSION}
+ENV WRF_VERSION 4.4.2
+ENV WPS_VERSION 4.3.1
 
 ENV JASPERINC /usr/include
 ENV JASPERLIB /usr/lib64
@@ -37,6 +34,14 @@ RUN cd /opt/local/WRF \
     && cd /opt/local/WPS \
     && chmod +x build_wps*.sh \
     && git add build_wps*.sh
+
+RUN echo "building WRF variants & WPS too" \
+    && /opt/local/WRF/build_wrf.sh \
+    && /opt/local/WRF/build_wrf_chem.sh \
+    && /opt/local/WPS/build_wps.sh \
+    && cd /opt/local/WRF && git clean -xdf . >/dev/null 2>&1 \
+    && cd /opt/local/WPS && git clean -xdf . >/dev/null 2>&1 \
+    && docker-clean
 
 # Local Variables:
 # mode: sh

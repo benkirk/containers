@@ -12,12 +12,10 @@ cd ${SCRIPTDIR} || exit 1
 export WRFIO_NCD_LARGE_FILE_SUPPORT=1
 export WRF_DIR=/opt/local/WRF
 
-#./clean -a
 git clean -xdf .
 
 env | sort > build-env-wps.log
 
-.
 # ------------------------------------------------------------------------
 # Please select from among the following supported platforms.
 #
@@ -74,6 +72,3 @@ mkdir -p ${outdir} || exit 1
 for file in */src/*.exe *.log configure.wps; do
     cp -r ${file} ${outdir}
 done
-
-echo "Cleaning source tree"
-git clean -xdf . >/dev/null 2>&1

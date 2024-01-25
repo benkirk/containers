@@ -17,11 +17,9 @@ export WRF_EM_CORE=1
 export WRF_KPP=1
 export WRF_NMM_CORE=0
 
-# ./clean -a
 git clean -xdf .
 
 env | sort > build-env-wrfchem.log
-
 
 # ------------------------------------------------------------------------
 # Please select from among the following Linux x86_64 options:
@@ -63,6 +61,3 @@ mkdir -p ${outdir} || exit 1
 for file in main/*.exe *.log configure.wrf; do
     cp -r ${file} ${outdir}
 done
-
-echo "Cleaning source tree"
-git clean -xdf . >/dev/null 2>&1

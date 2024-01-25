@@ -14,10 +14,9 @@ which mpif90 || { echo "Cannot locate an MPI compiler - check your environment?!
 
 export WRFIO_NCD_LARGE_FILE_SUPPORT=1
 
+git clean -xdf .
+
 env | sort > build-env-wrf.log
-
-./clean -a
-
 
 # ------------------------------------------------------------------------
 # Please select from among the following Linux x86_64 options:
@@ -59,6 +58,3 @@ mkdir -p ${outdir} || exit 1
 for file in main/*.exe *.log configure.wrf; do
     cp -r ${file} ${outdir}
 done
-
-echo "Cleaning source tree"
-git clean -xdf . >/dev/null 2>&1
