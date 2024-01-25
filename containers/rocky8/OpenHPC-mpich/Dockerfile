@@ -61,6 +61,11 @@ RUN echo "Installing MPI benchmark applications" \
     && make -C src_c/P2P -f Makefile TARGET=P2P clean \
     && docker-clean
 
+# make our build ARGs available to derived containers a ENV vars
+ENV COMPILER_VERSION   ${COMPILER_VERSION}
+ENV MPI_FAMILY         ${MPI_FAMILY}
+ENV MPI_FAMILY_VARIANT ${MPI_FAMILY_VARIANT}
+
 # Local Variables:
 # mode: sh
 # End:
