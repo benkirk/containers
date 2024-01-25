@@ -53,7 +53,7 @@ env | sort > build-env-wrfchem.log
 1
 EOF
 
-./compile em_real 2>&1 | tee compile-wrfchem-out.log || exit 1
+./compile em_real 2>&1 > compile-wrfchem-out.log || cat compile-wrfchem-out.log && exit 1
 
 outdir=/opt/local/wrf-chem-${WRF_VERSION}
 mkdir -p ${outdir} || exit 1
