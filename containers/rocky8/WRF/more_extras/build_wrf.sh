@@ -50,7 +50,7 @@ env | sort > build-env-wrf.log
 1
 EOF
 
-./compile em_real 2>&1 > compile-wrf-out.log || cat compile-wrf-out.log && exit 1
+./compile em_real > compile-wrf-out.log 2>&1 || cat compile-wrf-out.log && exit 1
 
 outdir=/opt/local/wrf-${WRF_VERSION}
 mkdir -p ${outdir} || exit 1

@@ -64,7 +64,7 @@ env | sort > build-env-wps.log
 1
 EOF
 
-./compile 2>&1 > compile-wps-out.log || cat compile-wps-out.log && exit 1
+./compile > compile-wps-out.log 2>&1 || cat compile-wps-out.log && exit 1
 
 outdir=/opt/local/wps-${WPS_VERSION}
 mkdir -p ${outdir} || exit 1
