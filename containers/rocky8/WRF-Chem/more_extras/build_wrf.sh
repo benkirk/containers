@@ -7,20 +7,16 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 cd ${SCRIPTDIR} || exit 1
 
+
 [ -f /opt/local/config_env.sh ] && . /opt/local/config_env.sh
 
 which mpif90 || { echo "Cannot locate an MPI compiler - check your environment?!"; exit 1; }
 
 export WRFIO_NCD_LARGE_FILE_SUPPORT=1
-export WRF_CHEM=1
-export WRF_EM_CORE=1
-export WRF_KPP=1
-export WRF_NMM_CORE=0
 
-# ./clean -a
-git clean -xdf .
+env | sort > build-env-wrf.log
 
-env | sort > build-env-wrfchem.log
+./clean -a
 
 
 # ------------------------------------------------------------------------
@@ -50,14 +46,14 @@ env | sort > build-env-wrfchem.log
 #  80. (serial)  81. (smpar)  82. (dmpar)  83. (dm+sm)   FUJITSU (frtpx/fccpx): FX10/FX100 SPARC64 IXfx/Xlfx
 
 
-./configure <<EOF 2>&1 | tee configure-wrfchem-out.log
+./configure <<EOF 2>&1 | tee configure-wrf-out.log
 34
 1
 EOF
 
-./compile em_real 2>&1 | tee compile-wrfchem-out.log || exit 1
+./compile em_real 2>&1 | tee compile-wrf-out.log || exit 1
 
-outdir=/opt/local/wrf-chem-${WRF_VERSION}
+outdir=/opt/local/wrf-${WRF_VERSION}
 mkdir -p ${outdir} || exit 1
 
 for file in main/*.exe *.log configure.wrf; do

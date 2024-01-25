@@ -1,1 +1,1 @@
-Dockerfile.OpenHPC_derived
+Dockerfile.standalone_rocky8

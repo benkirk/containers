@@ -1,7 +1,13 @@
 FROM docker.io/rockylinux/rockylinux:8
 # (deprecated): MAINTAINER Ben Kirk <benjamin.s.kirk@gmail.com>
 
-ENV MPICH_VERSION 3.4.3
+ARG MPICH_VERSION 3.4.3
+ARG NETCDF_C_VERSION 4.9.2
+ARG NETCDF_FORTRAN_VERSION 4.6.1
+
+ENV MPICH_VERSION ${MPICH_VERSION}
+ENV NETCDF_C_VERSION ${NETCDF_C_VERSION}
+ENV NETCDF_FORTRAN_VERSION ${NETCDF_FORTRAN_VERSION}
 
 
 ########################################
@@ -22,10 +28,39 @@ RUN echo "yum/dnf tweaks" \
            python3 cmake wget curl \
            openblas-devel \
            hdf5-devel \
-           netcdf netcdf-devel netcdf-fortran netcdf-fortran-devel \
            byacc flex-devel jasper-devel \
+           ncl-devel \
+           tcsh time \
+           libcurl-devel zlib-devel \
+           libxml2-devel \
+           libtirpc-devel \
     && docker-clean \
     && adduser plainuser && mkdir /opt/local && chown plainuser: /opt/local
+
+# Build netCDF C and Fortran libraries
+RUN mkdir -p /opt/local/netcdf/BUILD_DIR \
+    && cd /opt/local/netcdf/BUILD_DIR \
+    && curl -L -O https://github.com/Unidata/netcdf-c/archive/v${NETCDF_C_VERSION}.tar.gz \
+    && curl -L -O https://github.com/Unidata/netcdf-fortran/archive/v${NETCDF_FORTRAN_VERSION}.tar.gz \
+    && tar -xf v${NETCDF_C_VERSION}.tar.gz \
+    && cd netcdf-c-${NETCDF_C_VERSION} \
+    && ./configure \
+           --prefix=/opt/local/netcdf \
+           CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
+    && make install \
+    && cd /opt/local/netcdf/BUILD_DIR \
+    && tar -xf v${NETCDF_FORTRAN_VERSION}.tar.gz \
+    && cd netcdf-fortran-${NETCDF_FORTRAN_VERSION}/ \
+    && export LD_LIBRARY_PATH=/opt/local/netcdf/lib:${LD_LIBRARY_PATH} \
+    && echo "# NETCDF libraries" >> /opt/local/config_env.sh \
+    && echo "PATH=/opt/local/netcdf/bin:\${PATH}" >> /opt/local/config_env.sh \
+    && echo "LD_LIBRARY_PATH=/opt/local/netcdf/lib:\${LD_LIBRARY_PATH}" >> /opt/local/config_env.sh \
+    && ./configure \
+           --prefix=/opt/local/netcdf \
+           CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
+           CPPFLAGS="-I/opt/local/netcdf/include" LDFLAGS="-L/opt/local/netcdf/lib" \
+    && make install \
+    && rm -rf /opt/local/netcdf/BUILD_DIR
 
 # Build MPICH-v3.x
 RUN mkdir -p /opt/local \
@@ -41,21 +76,24 @@ RUN mkdir -p /opt/local \
            CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
     && make -j 8 install && cd /opt/local/ && rm -rf /opt/local/mpich-${MPICH_VERSION}/src/ \
     && echo "# MPICH v${MPICH_VERSION} paths" >> config_env.sh \
-    && echo "export PATH=/opt/local/mpich-${MPICH_VERSION}/install/bin:${PATH}" >> config_env.sh \
-    && echo "export LD_LIBRARY_PATH=/opt/local/mpich-${MPICH_VERSION}/install/lib:${LD_LIBRARY_PATH}" >> config_env.sh \
+    && echo "export PATH=/opt/local/mpich-${MPICH_VERSION}/install/bin:\${PATH}" >> config_env.sh \
+    && echo "export LD_LIBRARY_PATH=/opt/local/mpich-${MPICH_VERSION}/install/lib:\${LD_LIBRARY_PATH}" >> config_env.sh \
     && docker-clean
 
 # Prevent mpicxx from linking -lmpicxx, which we do not need, and cannot use on our Cray-EX
 RUN whoami && cd /opt/local \
     && sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /opt/local/mpich-${MPICH_VERSION}/install/bin/mpicxx
 
-# # Download NCL
-# ENV NCARG_ROOT /opt/local/ncl/6.3.0
-# RUN mkdir -p ${NCARG_ROOT} \
-#     && curl -SL https://www.earthsystemgrid.org/api/v1/dataset/ncl.630.1/file/ncl_ncarg-6.3.0.Linux_CentOS7.0_x86_64_nodap_gcc482.tar.gz | tar zxC ${NCARG_ROOT}
+# # Other WRF build dependencies:
+# RUN echo "Other WRF build dependencies" \
+#     && dnf -y install \
+#            grib_api-devel \
+#     && docker-clean
 
-# Hackery:
-RUN cd /usr/lib64 && ln -s libjasper.so libjasper.a
+# add to default shell environments
+RUN cd /etc/profile.d \
+    && ln /opt/local/config_env.sh ./z00-build-env.sh
+
 
 # Local Variables:
 # mode: sh
