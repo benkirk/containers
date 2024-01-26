@@ -50,7 +50,8 @@ env | sort > build-env-wrf.log
 1
 EOF
 
-./compile em_real > compile-wrf-out.log 2>&1 || { cat compile-wrf-out.log; exit 1; }
+./compile em_real 2>&1 | tee compile-wrf-out.log
+#./compile em_real > compile-wrf-out.log 2>&1 || { cat compile-wrf-out.log; exit 1; }
 
 set -x
 outdir=/container/wrf-${WRF_VERSION}

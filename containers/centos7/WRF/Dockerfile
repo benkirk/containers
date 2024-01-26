@@ -1,17 +1,22 @@
-FROM benjaminkirk/rocky8-wrf-build-environment:latest
+FROM benjaminkirk/centos7-wrf-build-environment:latest
 
 ENV WRF_VERSION 4.4.2
 ENV WPS_VERSION 4.3.1
 
 ENV JASPERINC /usr/include
 ENV JASPERLIB /usr/lib64
-ENV HDF5 /usr
+ENV HDF5 /container/hdf5
 ENV NETCDF /container/netcdf
 
 ENV FLEX_LIB_DIR "/usr/lib64"
 ENV YACC "/usr/bin/yacc -d"
-ENV LIB_LOCAL "-lnetcdf -lnetcdff -Wl,-rpath,/container/netcdf/lib/"
+ENV LIB_LOCAL "-lnetcdf -lnetcdff -Wl,-rpath,/container/netcdf/lib/ -Wl,-rpath,/container/hdf5/lib/"
 
+# Set up base OS environment
+RUN echo "base OS environment with additional WRF dependencies" \
+    && yum -y install \
+           file flex \
+    && docker-clean
 
 RUN cd /container \
     && git clone https://github.com/wrf-model/WRF.git \

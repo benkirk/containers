@@ -64,7 +64,8 @@ env | sort > build-env-wps.log
 1
 EOF
 
-./compile > compile-wps-out.log 2>&1 || { cat compile-wps-out.log; exit 1; }
+./compile 2>&1 | tee compile-wps.log
+#./compile > compile-wps-out.log 2>&1 || { cat compile-wps-out.log; exit 1; }
 
 set -x
 outdir=/container/wps-${WPS_VERSION}
