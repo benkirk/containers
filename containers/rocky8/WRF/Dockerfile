@@ -35,8 +35,12 @@ RUN cd /opt/local/WRF \
     && chmod +x build_wps*.sh \
     && git add build_wps*.sh
 
-RUN echo "building WRF variants & WPS too" \
+RUN echo "building WRF" \
     && /opt/local/WRF/build_wrf.sh \
+    && cd /opt/local/WRF && git clean -xdf . >/dev/null 2>&1 \
+    && docker-clean
+
+RUN echo "building WRF-Chem & WPS" \
     && /opt/local/WRF/build_wrf_chem.sh \
     && /opt/local/WPS/build_wps.sh \
     && cd /opt/local/WRF && git clean -xdf . >/dev/null 2>&1 \

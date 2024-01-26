@@ -64,11 +64,12 @@ env | sort > build-env-wps.log
 1
 EOF
 
-./compile > compile-wps-out.log 2>&1 || cat compile-wps-out.log && exit 1
+./compile > compile-wps-out.log 2>&1 || { cat compile-wps-out.log; exit 1; }
 
+set -x
 outdir=/opt/local/wps-${WPS_VERSION}
 mkdir -p ${outdir} || exit 1
 
 for file in */src/*.exe *.log configure.wps; do
-    cp -r ${file} ${outdir}
+    cp -r ${file} ${outdir}/
 done

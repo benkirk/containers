@@ -50,11 +50,12 @@ env | sort > build-env-wrf.log
 1
 EOF
 
-./compile em_real > compile-wrf-out.log 2>&1 || cat compile-wrf-out.log && exit 1
+./compile em_real > compile-wrf-out.log 2>&1 || { cat compile-wrf-out.log; exit 1; }
 
+set -x
 outdir=/opt/local/wrf-${WRF_VERSION}
 mkdir -p ${outdir} || exit 1
 
 for file in main/*.exe *.log configure.wrf; do
-    cp -r ${file} ${outdir}
+    cp -r ${file} ${outdir}/
 done
