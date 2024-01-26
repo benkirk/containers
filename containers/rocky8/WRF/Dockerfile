@@ -10,7 +10,7 @@ ENV NETCDF /opt/local/netcdf
 
 ENV FLEX_LIB_DIR "/usr/lib64"
 ENV YACC "/usr/bin/yacc -d"
-ENV LIB_LOCAL "-lnetcdf -lnetcdff"
+ENV LIB_LOCAL "-lnetcdf -lnetcdff -Wl,-rpath,/opt/local/netcdf/lib/"
 
 
 RUN cd /opt/local \
