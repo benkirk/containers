@@ -7,10 +7,10 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 cd ${SCRIPTDIR} || exit 1
 
-[ -f /opt/local/config_env.sh ] && . /opt/local/config_env.sh
+[ -f /container/config_env.sh ] && . /container/config_env.sh
 
 export WRFIO_NCD_LARGE_FILE_SUPPORT=1
-export WRF_DIR=/opt/local/WRF
+export WRF_DIR=/container/WRF
 
 git clean -xdf .
 
@@ -67,7 +67,7 @@ EOF
 ./compile > compile-wps-out.log 2>&1 || { cat compile-wps-out.log; exit 1; }
 
 set -x
-outdir=/opt/local/wps-${WPS_VERSION}
+outdir=/container/wps-${WPS_VERSION}
 mkdir -p ${outdir} || exit 1
 
 for file in */src/*.exe *.log configure.wps; do

@@ -30,54 +30,54 @@ RUN echo "yum/dnf tweaks" \
            libxml2-devel \
            libtirpc-devel \
     && docker-clean \
-    && adduser plainuser && mkdir /opt/local && chown plainuser: /opt/local
+    && adduser plainuser && mkdir /container && chown plainuser: /container
 
 # Build netCDF C and Fortran libraries
-RUN mkdir -p /opt/local/netcdf/BUILD_DIR \
-    && cd /opt/local/netcdf/BUILD_DIR \
+RUN mkdir -p /container/netcdf/BUILD_DIR \
+    && cd /container/netcdf/BUILD_DIR \
     && curl -L -O https://github.com/Unidata/netcdf-c/archive/v${NETCDF_C_VERSION}.tar.gz \
     && curl -L -O https://github.com/Unidata/netcdf-fortran/archive/v${NETCDF_FORTRAN_VERSION}.tar.gz \
     && tar -xf v${NETCDF_C_VERSION}.tar.gz \
     && cd netcdf-c-${NETCDF_C_VERSION} \
     && ./configure \
-           --prefix=/opt/local/netcdf \
+           --prefix=/container/netcdf \
            CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
     && make install \
-    && cd /opt/local/netcdf/BUILD_DIR \
+    && cd /container/netcdf/BUILD_DIR \
     && tar -xf v${NETCDF_FORTRAN_VERSION}.tar.gz \
     && cd netcdf-fortran-${NETCDF_FORTRAN_VERSION}/ \
-    && export LD_LIBRARY_PATH=/opt/local/netcdf/lib:${LD_LIBRARY_PATH} \
-    && echo "# NETCDF libraries" >> /opt/local/config_env.sh \
-    && echo "PATH=/opt/local/netcdf/bin:\${PATH}" >> /opt/local/config_env.sh \
-    && echo "LD_LIBRARY_PATH=/opt/local/netcdf/lib:\${LD_LIBRARY_PATH}" >> /opt/local/config_env.sh \
+    && export LD_LIBRARY_PATH=/container/netcdf/lib:${LD_LIBRARY_PATH} \
+    && echo "# NETCDF libraries" >> /container/config_env.sh \
+    && echo "PATH=/container/netcdf/bin:\${PATH}" >> /container/config_env.sh \
+    && echo "LD_LIBRARY_PATH=/container/netcdf/lib:\${LD_LIBRARY_PATH}" >> /container/config_env.sh \
     && ./configure \
-           --prefix=/opt/local/netcdf \
+           --prefix=/container/netcdf \
            CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
-           CPPFLAGS="-I/opt/local/netcdf/include" LDFLAGS="-L/opt/local/netcdf/lib" \
+           CPPFLAGS="-I/container/netcdf/include" LDFLAGS="-L/container/netcdf/lib" \
     && make install \
-    && rm -rf /opt/local/netcdf/BUILD_DIR
+    && rm -rf /container/netcdf/BUILD_DIR
 
 # Build MPICH-v3.x
-RUN mkdir -p /opt/local \
-    && cd /opt/local \
+RUN mkdir -p /container \
+    && cd /container \
     && wget -q http://www.mpich.org/static/downloads/${MPICH_VERSION}/mpich-${MPICH_VERSION}.tar.gz \
     && mkdir mpich-${MPICH_VERSION} && cd mpich-${MPICH_VERSION} && tar xf ../mpich-${MPICH_VERSION}.tar.gz  && rm -f ../mpich-${MPICH_VERSION}.tar.gz \
-    && mv mpich-${MPICH_VERSION} /opt/local/mpich-${MPICH_VERSION}/src/ && cd /opt/local/mpich-${MPICH_VERSION}/src/ \
+    && mv mpich-${MPICH_VERSION} /container/mpich-${MPICH_VERSION}/src/ && cd /container/mpich-${MPICH_VERSION}/src/ \
     && ./configure \
-           --prefix=/opt/local/mpich-${MPICH_VERSION}/install \
+           --prefix=/container/mpich-${MPICH_VERSION}/install \
            --with-wrapper-dl-type=none \
            --with-device=ch4:ofi \
            --enable-fortran \
            CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
-    && make -j 8 install && cd /opt/local/ && rm -rf /opt/local/mpich-${MPICH_VERSION}/src/ \
+    && make -j 8 install && cd /container/ && rm -rf /container/mpich-${MPICH_VERSION}/src/ \
     && echo "# MPICH v${MPICH_VERSION} paths" >> config_env.sh \
-    && echo "export PATH=/opt/local/mpich-${MPICH_VERSION}/install/bin:\${PATH}" >> config_env.sh \
-    && echo "export LD_LIBRARY_PATH=/opt/local/mpich-${MPICH_VERSION}/install/lib:\${LD_LIBRARY_PATH}" >> config_env.sh \
+    && echo "export PATH=/container/mpich-${MPICH_VERSION}/install/bin:\${PATH}" >> config_env.sh \
+    && echo "export LD_LIBRARY_PATH=/container/mpich-${MPICH_VERSION}/install/lib:\${LD_LIBRARY_PATH}" >> config_env.sh \
     && docker-clean
 
 # Prevent mpicxx from linking -lmpicxx, which we do not need, and cannot use on our Cray-EX
-RUN whoami && cd /opt/local \
-    && sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /opt/local/mpich-${MPICH_VERSION}/install/bin/mpicxx
+RUN whoami && cd /container \
+    && sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /container/mpich-${MPICH_VERSION}/install/bin/mpicxx
 
 # # Other WRF build dependencies:
 # RUN echo "Other WRF build dependencies" \
@@ -87,7 +87,7 @@ RUN whoami && cd /opt/local \
 
 # add to default shell environments
 RUN cd /etc/profile.d \
-    && ln /opt/local/config_env.sh ./z00-build-env.sh
+    && ln /container/config_env.sh ./z00-build-env.sh
 
 
 # Local Variables:

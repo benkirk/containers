@@ -6,45 +6,45 @@ ENV WPS_VERSION 4.3.1
 ENV JASPERINC /usr/include
 ENV JASPERLIB /usr/lib64
 ENV HDF5 /usr
-ENV NETCDF /opt/local/netcdf
+ENV NETCDF /container/netcdf
 
 ENV FLEX_LIB_DIR "/usr/lib64"
 ENV YACC "/usr/bin/yacc -d"
-ENV LIB_LOCAL "-lnetcdf -lnetcdff -Wl,-rpath,/opt/local/netcdf/lib/"
+ENV LIB_LOCAL "-lnetcdf -lnetcdff -Wl,-rpath,/container/netcdf/lib/"
 
 
-RUN cd /opt/local \
+RUN cd /container \
     && git clone https://github.com/wrf-model/WRF.git \
     && cd WRF \
     && git fetch --all --tags \
     && git checkout v${WRF_VERSION} -b local/v${WRF_VERSION} \
-    && cd /opt/local \
+    && cd /container \
     && git clone https://github.com/wrf-model/WPS.git \
     && cd WPS \
     && git fetch --all --tags \
     && git checkout v${WPS_VERSION} -b local/v${WPS_VERSION}
 
-ADD extras/build_wrf.sh      /opt/local/WRF/build_wrf.sh
-ADD extras/build_wrf_chem.sh /opt/local/WRF/build_wrf_chem.sh
-ADD extras/build_wps.sh      /opt/local/WPS/build_wps.sh
+ADD extras/build_wrf.sh      /container/WRF/build_wrf.sh
+ADD extras/build_wrf_chem.sh /container/WRF/build_wrf_chem.sh
+ADD extras/build_wps.sh      /container/WPS/build_wps.sh
 
-RUN cd /opt/local/WRF \
+RUN cd /container/WRF \
     && chmod +x build_wrf*.sh \
     && git add build_wrf*.sh \
-    && cd /opt/local/WPS \
+    && cd /container/WPS \
     && chmod +x build_wps*.sh \
     && git add build_wps*.sh
 
 RUN echo "building WRF" \
-    && /opt/local/WRF/build_wrf.sh \
-    && cd /opt/local/WRF && git clean -xdf . >/dev/null 2>&1 \
+    && /container/WRF/build_wrf.sh \
+    && cd /container/WRF && git clean -xdf . >/dev/null 2>&1 \
     && docker-clean
 
 RUN echo "building WRF-Chem & WPS" \
-    && /opt/local/WRF/build_wrf_chem.sh \
-    && /opt/local/WPS/build_wps.sh \
-    && cd /opt/local/WRF && git clean -xdf . >/dev/null 2>&1 \
-    && cd /opt/local/WPS && git clean -xdf . >/dev/null 2>&1 \
+    && /container/WRF/build_wrf_chem.sh \
+    && /container/WPS/build_wps.sh \
+    && cd /container/WRF && git clean -xdf . >/dev/null 2>&1 \
+    && cd /container/WPS && git clean -xdf . >/dev/null 2>&1 \
     && docker-clean
 
 # Local Variables:

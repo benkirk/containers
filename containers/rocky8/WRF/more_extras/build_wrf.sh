@@ -8,7 +8,7 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd ${SCRIPTDIR} || exit 1
 
 
-[ -f /opt/local/config_env.sh ] && . /opt/local/config_env.sh
+[ -f /container/config_env.sh ] && . /container/config_env.sh
 
 which mpif90 || { echo "Cannot locate an MPI compiler - check your environment?!"; exit 1; }
 
@@ -53,7 +53,7 @@ EOF
 ./compile em_real > compile-wrf-out.log 2>&1 || { cat compile-wrf-out.log; exit 1; }
 
 set -x
-outdir=/opt/local/wrf-${WRF_VERSION}
+outdir=/container/wrf-${WRF_VERSION}
 mkdir -p ${outdir} || exit 1
 
 for file in main/*.exe *.log configure.wrf; do
