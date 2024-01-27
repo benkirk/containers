@@ -19,15 +19,14 @@ RUN echo "yum/dnf tweaks" \
     && dnf -y groupinstall "Development Tools" \
     && dnf -y install \
            bzip2 autoconf automake libtool git \
-           gcc gcc-c++ gcc-gfortran emacs make procps-ng \
-           python3 cmake wget curl \
+           gcc gcc-c++ gcc-gfortran emacs-nox make procps-ng \
+           python3 wget curl \
            openblas-devel \
            hdf5-devel \
-           byacc flex-devel jasper-devel \
+           byacc flex flex-devel jasper-devel \
            ncl-devel \
            tcsh time \
            libcurl-devel zlib-devel \
-           libxml2-devel \
            libtirpc-devel \
     && docker-clean \
     && adduser plainuser && mkdir /container && chown plainuser: /container
@@ -35,42 +34,41 @@ RUN echo "yum/dnf tweaks" \
 # Build netCDF C and Fortran libraries
 RUN mkdir -p /container/netcdf/BUILD_DIR \
     && cd /container/netcdf/BUILD_DIR \
-    && curl -L -O https://github.com/Unidata/netcdf-c/archive/v${NETCDF_C_VERSION}.tar.gz \
-    && curl -L -O https://github.com/Unidata/netcdf-fortran/archive/v${NETCDF_FORTRAN_VERSION}.tar.gz \
-    && tar -xf v${NETCDF_C_VERSION}.tar.gz \
+    && curl -sSL https://github.com/Unidata/netcdf-c/archive/v${NETCDF_C_VERSION}.tar.gz | tar zx \
+    && curl -SSL https://github.com/Unidata/netcdf-fortran/archive/v${NETCDF_FORTRAN_VERSION}.tar.gz | tar zx \
     && cd netcdf-c-${NETCDF_C_VERSION} \
     && ./configure \
-           --prefix=/container/netcdf \
            CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
-    && make install \
+           --prefix=/container/netcdf \
+           --disable-libxml2 \
+    && make && make install \
     && cd /container/netcdf/BUILD_DIR \
-    && tar -xf v${NETCDF_FORTRAN_VERSION}.tar.gz \
     && cd netcdf-fortran-${NETCDF_FORTRAN_VERSION}/ \
     && export LD_LIBRARY_PATH=/container/netcdf/lib:${LD_LIBRARY_PATH} \
-    && echo "# NETCDF libraries" >> /container/config_env.sh \
-    && echo "PATH=/container/netcdf/bin:\${PATH}" >> /container/config_env.sh \
-    && echo "LD_LIBRARY_PATH=/container/netcdf/lib:\${LD_LIBRARY_PATH}" >> /container/config_env.sh \
     && ./configure \
-           --prefix=/container/netcdf \
            CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
            CPPFLAGS="-I/container/netcdf/include" LDFLAGS="-L/container/netcdf/lib" \
-    && make install \
+           --prefix=/container/netcdf \
+    && make && make install \
+    && echo -e "\n# NETCDF libraries" >> /container/config_env.sh \
+    && echo "PATH=/container/netcdf/bin:\${PATH}" >> /container/config_env.sh \
+    && echo "LD_LIBRARY_PATH=/container/netcdf/lib:\${LD_LIBRARY_PATH}" >> /container/config_env.sh \
     && rm -rf /container/netcdf/BUILD_DIR
 
 # Build MPICH-v3.x
 RUN mkdir -p /container \
     && cd /container \
-    && wget -q http://www.mpich.org/static/downloads/${MPICH_VERSION}/mpich-${MPICH_VERSION}.tar.gz \
-    && mkdir mpich-${MPICH_VERSION} && cd mpich-${MPICH_VERSION} && tar xf ../mpich-${MPICH_VERSION}.tar.gz  && rm -f ../mpich-${MPICH_VERSION}.tar.gz \
+    && mkdir mpich-${MPICH_VERSION} && cd mpich-${MPICH_VERSION} \
+    && curl -sSL wget -q http://www.mpich.org/static/downloads/${MPICH_VERSION}/mpich-${MPICH_VERSION}.tar.gz | tar zx \
     && mv mpich-${MPICH_VERSION} /container/mpich-${MPICH_VERSION}/src/ && cd /container/mpich-${MPICH_VERSION}/src/ \
     && ./configure \
+           CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
            --prefix=/container/mpich-${MPICH_VERSION}/install \
            --with-wrapper-dl-type=none \
            --with-device=ch4:ofi \
            --enable-fortran \
-           CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
     && make -j 8 install && cd /container/ && rm -rf /container/mpich-${MPICH_VERSION}/src/ \
-    && echo "# MPICH v${MPICH_VERSION} paths" >> config_env.sh \
+    && echo -e "\n# MPICH v${MPICH_VERSION} paths" >> config_env.sh \
     && echo "export PATH=/container/mpich-${MPICH_VERSION}/install/bin:\${PATH}" >> config_env.sh \
     && echo "export LD_LIBRARY_PATH=/container/mpich-${MPICH_VERSION}/install/lib:\${LD_LIBRARY_PATH}" >> config_env.sh \
     && docker-clean

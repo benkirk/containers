@@ -19,6 +19,7 @@ RUN echo "yum addons" \
            gcc gcc-c++ make autoconf automake \
            wget git which tar bzip2 \
            openssl-devel \
+           libcurl-devel \
            glibc-static \
            zlib-static \
            blas-static \
@@ -45,36 +46,36 @@ SHELL ["/bin/bash", "-lc"]
 
 RUN echo "git upstream" \
     && cd ${BUILD_STAGE_PATH} \
-    && git clone https://github.com/benkirk/libmesh_build_support.git \
-    && cd libmesh_build_support && ./autogen.sh \
+    && git clone https://github.com/benkirk/WRF_build_support.git \
+    && cd WRF_build_support && ./autogen.sh \
     && docker-clean
 
-RUN echo "setup build env: devel" \
-    && cd ${BUILD_STAGE_PATH} \
-    && source ${BUILD_STAGE_PATH}/libmesh_build_support/utils/versions/devel.sh \
-    && mkdir -p centos7/devel && cd centos7/devel \
-    && ${BUILD_STAGE_PATH}/libmesh_build_support/configure --prefix=$(pwd) \
-    && docker-clean
+# RUN echo "setup build env: devel" \
+#     && cd ${BUILD_STAGE_PATH} \
+#     && source ${BUILD_STAGE_PATH}/WRF_build_support/utils/versions/devel.sh \
+#     && mkdir -p centos7/devel && cd centos7/devel \
+#     && ${BUILD_STAGE_PATH}/WRF_build_support/configure --prefix=$(pwd) \
+#     && docker-clean
 
-RUN echo "setup build env: stable" \
-    && cd ${BUILD_STAGE_PATH} \
-    && source ${BUILD_STAGE_PATH}/libmesh_build_support/utils/versions/stable.sh \
-    && mkdir -p centos7/stable && cd centos7/stable \
-    && ${BUILD_STAGE_PATH}/libmesh_build_support/configure --prefix=$(pwd) \
-    && docker-clean
+# RUN echo "setup build env: stable" \
+#     && cd ${BUILD_STAGE_PATH} \
+#     && source ${BUILD_STAGE_PATH}/WRF_build_support/utils/versions/stable.sh \
+#     && mkdir -p centos7/stable && cd centos7/stable \
+#     && ${BUILD_STAGE_PATH}/WRF_build_support/configure --prefix=$(pwd) \
+#     && docker-clean
 
 # RUN echo "setup build env: bleeding" \
 #     && cd ${BUILD_STAGE_PATH} \
-#     && source ${BUILD_STAGE_PATH}/libmesh_build_support/utils/versions/bleeding.sh \
+#     && source ${BUILD_STAGE_PATH}/WRF_build_support/utils/versions/bleeding.sh \
 #     && mkdir -p centos7/bleeding && cd centos7/bleeding \
-#     && ${BUILD_STAGE_PATH}/libmesh_build_support/configure --prefix=$(pwd) \
+#     && ${BUILD_STAGE_PATH}/WRF_build_support/configure --prefix=$(pwd) \
 #     && docker-clean
 
 RUN echo "setup build env: default" \
     && cd ${BUILD_STAGE_PATH} \
-    && source ${BUILD_STAGE_PATH}/libmesh_build_support/utils/versions/default.sh \
+    && source ${BUILD_STAGE_PATH}/WRF_build_support/utils/versions/default.sh \
     && mkdir -p centos7/default && cd centos7/default \
-    && ${BUILD_STAGE_PATH}/libmesh_build_support/configure --prefix=$(pwd) \
+    && ${BUILD_STAGE_PATH}/WRF_build_support/configure --prefix=$(pwd) \
     && docker-clean
 
 ENV BUILD_STAGE_PATH=${BUILD_STAGE_PATH}
