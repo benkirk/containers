@@ -34,7 +34,15 @@ RUN cd /container \
     && git clone https://github.com/wrf-model/WPS.git \
     && cd WPS \
     && git fetch --all --tags \
-    && git checkout v${WPS_VERSION} -b local/v${WPS_VERSION}
+    && git checkout v${WPS_VERSION} -b local/v${WPS_VERSION} \
+    && git grep -l '\-lpng' | xargs sed -i 's/-lpng /-lpng16 /g' \
+    && git grep -l '$(COMPRESSION_INC)' | xargs sed -i 's/$(COMPRESSION_INC)/$(COMPRESSION_INC) -I\/usr\/include\/libpng16/g' \
+    && git diff
+
+#     && find . -name Makefile | xargs sed -i 's/CFLAGS="$(CFLAGS)/CFLAGS="$(CFLAGS) $(EXTRA_WPS_CFLAGS)/g' \
+#     && find . -name Makefile | xargs sed -i 's/FFLAGS="$(FFLAGS)/FFLAGS="$(FFLAGS) $(EXTRA_WPS_FFLAGS)/g' \
+#     && find . -name Makefile | xargs sed -i 's/CPPFLAGS="$(CPPFLAGS)/CPPFLAGS="$(CPPFLAGS) $(EXTRA_WPS_CPPFLAGS)/g' \
+#     && find . -name Makefile | xargs sed -i 's/LDFLAGS="$(LDFLAGS)/LDFLAGS="$(LDFLAGS) $(EXTRA_WPS_LDFLAGS)/g' \
 
 ADD extras/build_wrf.sh      /container/WRF/build_wrf.sh
 ADD extras/build_wrf_chem.sh /container/WRF/build_wrf_chem.sh
