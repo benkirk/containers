@@ -6,7 +6,7 @@ ADD extras/docker-clean /usr/bin/docker-clean
 RUN echo "base OS environment" \
     && yum -y update \
     && yum -y install \
-           bzip2 autoconf automake libtool git emacs gcc emacs-nox make procps-ng \
+           bzip2 autoconf automake libtool git emacs-nox procps-ng \
            jasper-devel hostname m4 make perl tar bash tcsh time curl file wget which zlib-devel byacc \
            flex flex-devel ncl-devel \
            epel-release \
@@ -51,7 +51,7 @@ RUN mkdir -p /container/hdf5/BUILD_DIR \
            CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
            --prefix=/container/hdf5 \
            --enable-hl \
-           --enable-cxx \
+           --disable-cxx \
            --enable-fortran \
            --disable-parallel \
            --with-szlib=no \
@@ -71,17 +71,22 @@ RUN mkdir -p /container/netcdf/BUILD_DIR \
     && cd netcdf-c-${NETCDF_C_VERSION} \
     && ./configure \
            CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
-           CPPFLAGS="-I/container/hdf5/include" LDFLAGS="-L/container/hdf5/lib -Wl,-rpath,/container/hdf5/lib" \
+           CPPFLAGS="-I/container/hdf5/include" \
+           LDFLAGS="-L/container/hdf5/lib -Wl,-rpath,/container/hdf5/lib" \
            --prefix=/container/netcdf \
            --disable-libxml2 \
+           --disable-dap \
+           --disable-byterange \
     && make -j 4 && make install \
     && cd /container/netcdf/BUILD_DIR \
     && cd netcdf-fortran-${NETCDF_FORTRAN_VERSION}/ \
     && export LD_LIBRARY_PATH=/container/netcdf/lib:${LD_LIBRARY_PATH} \
     && ./configure \
            CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
-           CPPFLAGS="-I/container/netcdf/include -I/container/hdf5/include" LDFLAGS="-L/container/netcdf/lib -Wl,-rpath,/container/netcdf/lib -L/container/hdf5/lib -Wl,-rpath,/container/hdf5/lib" \
+           CPPFLAGS="-I/container/netcdf/include -I/container/hdf5/include" \
+           LDFLAGS="-L/container/netcdf/lib -Wl,-rpath,/container/netcdf/lib -L/container/hdf5/lib -Wl,-rpath,/container/hdf5/lib" \
            --prefix=/container/netcdf \
+           --disable-dap \
     && make -j 4 && make install \
     && echo -e "\n# NETCDF libraries" >> /container/config_env.sh && echo "PATH=/container/netcdf/bin:\${PATH}" >> /container/config_env.sh \
     && echo "LD_LIBRARY_PATH=/container/netcdf/lib:\${LD_LIBRARY_PATH}" >> /container/config_env.sh \
@@ -97,7 +102,8 @@ RUN mkdir -p /container/mpich-${MPICH_VERSION} \
     && ./configure CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
                    --prefix=/container/mpich-${MPICH_VERSION}/install \
                    --with-wrapper-dl-type=none \
-                   --with-device=ch4:ofi --enable-fortran \
+                   --with-device=ch4:ofi \
+                   --enable-fortran --disable-cxx \
     && make -j 8 install \
     && cd /container/ && rm -rf /container/mpich-${MPICH_VERSION}/BUILD_DIR/ \
     && echo -e "\n# MPICH v${MPICH_VERSION} paths" >> config_env.sh \
@@ -106,8 +112,14 @@ RUN mkdir -p /container/mpich-${MPICH_VERSION} \
     && rm -rf /container/mpich-${MPICH_VERSION}/BUILD_DIR/ \
     && docker-clean
 
-RUN whoami \
-    && cd /container \
-    && sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /container/mpich-${MPICH_VERSION}/install/bin/mpicxx
+# # restore if we enable-cxx in MPICH
+# RUN whoami \
+#     && sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /container/mpich-${MPICH_VERSION}/install/bin/mpicxx
 
-RUN mkdir -p cd /etc/profile.d/ && ln /container/config_env.sh ./z00-build-env.sh && docker-clean
+RUN cd /etc/profile.d/ \
+    && ln -s /container/config_env.sh ./z00-build-env.sh \
+    && docker-clean
+
+# Local Variables:
+# mode: sh
+# End:
