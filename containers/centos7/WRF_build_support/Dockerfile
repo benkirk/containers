@@ -1,10 +1,8 @@
 FROM centos:7
 
 ARG BUILD_STAGE_PATH="/pv/path_for/bundle"
+ARG DEPLOY="centos7"
 
-########################################
-# Add docker-clean
-########################################
 ADD extras/docker-clean /usr/bin/docker-clean
 
 RUN echo "yum update" \
@@ -19,7 +17,6 @@ RUN echo "yum addons" \
            gcc gcc-c++ make autoconf automake \
            wget git which tar bzip2 \
            openssl-devel \
-           libcurl-devel \
            glibc-static \
            zlib-static \
            blas-static \
@@ -34,7 +31,8 @@ RUN echo "yum addons" \
 RUN echo "persistent volume & permissions" \
     && mkdir -p ${BUILD_STAGE_PATH}  && chown plainuser: ${BUILD_STAGE_PATH}
 
-USER plainuser
+#USER plainuser
+
 ADD extras/hello_world_mpi.C /opt/local/hello_world_mpi.C
 RUN echo "shell customization" \
     && echo "# Matlab-style history" >> ~/.bashrc \
@@ -50,31 +48,31 @@ RUN echo "git upstream" \
     && cd WRF_build_support && ./autogen.sh \
     && docker-clean
 
-# RUN echo "setup build env: devel" \
-#     && cd ${BUILD_STAGE_PATH} \
-#     && source ${BUILD_STAGE_PATH}/WRF_build_support/utils/versions/devel.sh \
-#     && mkdir -p centos7/devel && cd centos7/devel \
-#     && ${BUILD_STAGE_PATH}/WRF_build_support/configure --prefix=$(pwd) \
-#     && docker-clean
+RUN echo "setup build env: devel" \
+    && cd ${BUILD_STAGE_PATH} \
+    && source ${BUILD_STAGE_PATH}/WRF_build_support/utils/versions/devel.sh \
+    && mkdir -p ${DEPLOY}/devel && cd ${DEPLOY}/devel \
+    && ${BUILD_STAGE_PATH}/WRF_build_support/configure --prefix=$(pwd) \
+    && docker-clean
 
-# RUN echo "setup build env: stable" \
-#     && cd ${BUILD_STAGE_PATH} \
-#     && source ${BUILD_STAGE_PATH}/WRF_build_support/utils/versions/stable.sh \
-#     && mkdir -p centos7/stable && cd centos7/stable \
-#     && ${BUILD_STAGE_PATH}/WRF_build_support/configure --prefix=$(pwd) \
-#     && docker-clean
+RUN echo "setup build env: stable" \
+    && cd ${BUILD_STAGE_PATH} \
+    && source ${BUILD_STAGE_PATH}/WRF_build_support/utils/versions/stable.sh \
+    && mkdir -p ${DEPLOY}/stable && cd ${DEPLOY}/stable \
+    && ${BUILD_STAGE_PATH}/WRF_build_support/configure --prefix=$(pwd) \
+    && docker-clean
 
-# RUN echo "setup build env: bleeding" \
-#     && cd ${BUILD_STAGE_PATH} \
-#     && source ${BUILD_STAGE_PATH}/WRF_build_support/utils/versions/bleeding.sh \
-#     && mkdir -p centos7/bleeding && cd centos7/bleeding \
-#     && ${BUILD_STAGE_PATH}/WRF_build_support/configure --prefix=$(pwd) \
-#     && docker-clean
+RUN echo "setup build env: bleeding" \
+    && cd ${BUILD_STAGE_PATH} \
+    && source ${BUILD_STAGE_PATH}/WRF_build_support/utils/versions/bleeding.sh \
+    && mkdir -p ${DEPLOY}/bleeding && cd ${DEPLOY}/bleeding \
+    && ${BUILD_STAGE_PATH}/WRF_build_support/configure --prefix=$(pwd) \
+    && docker-clean
 
 RUN echo "setup build env: default" \
     && cd ${BUILD_STAGE_PATH} \
     && source ${BUILD_STAGE_PATH}/WRF_build_support/utils/versions/default.sh \
-    && mkdir -p centos7/default && cd centos7/default \
+    && mkdir -p ${DEPLOY}/default && cd ${DEPLOY}/default \
     && ${BUILD_STAGE_PATH}/WRF_build_support/configure --prefix=$(pwd) \
     && docker-clean
 
