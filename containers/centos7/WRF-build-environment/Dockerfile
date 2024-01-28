@@ -5,8 +5,11 @@ ADD extras/docker-clean /usr/bin/docker-clean
 # Set up base OS environment
 RUN echo "base OS environment" \
     && yum -y update \
-    && yum -y install bzip2 autoconf automake libtool git emacs gcc gcc-c++ gcc-gfortran emacs make procps-ng \
-           jasper-devel hostname m4 make perl tar bash tcsh time wget which zlib-devel byacc flex-devel ncl-devel curl-devel epel-release \
+    && yum -y install \
+           bzip2 autoconf automake libtool git emacs gcc emacs-nox make procps-ng \
+           jasper-devel hostname m4 make perl tar bash tcsh time curl file wget which zlib-devel byacc \
+           flex flex-devel ncl-devel \
+           epel-release \
     && docker-clean
 
 # # Newer version of GNU compiler, required for WRF 2003 and 2008 Fortran constructs
@@ -56,7 +59,7 @@ RUN mkdir -p /container/hdf5/BUILD_DIR \
     && echo -e "\n# HDF5 libraries" >> /container/config_env.sh \
     && echo "PATH=/container/hdf5/bin:\${PATH}" >> /container/config_env.sh \
     && echo "LD_LIBRARY_PATH=/container/hdf5/lib:\${LD_LIBRARY_PATH}" >> /container/config_env.sh \
-    && echo "NOT" rm -rf /container/hdf5/BUILD \
+    && rm -rf /container/hdf5/BUILD \
     && docker-clean
 
 RUN mkdir -p /container/netcdf/BUILD_DIR \
@@ -82,7 +85,7 @@ RUN mkdir -p /container/netcdf/BUILD_DIR \
     && make -j 4 && make install \
     && echo -e "\n# NETCDF libraries" >> /container/config_env.sh && echo "PATH=/container/netcdf/bin:\${PATH}" >> /container/config_env.sh \
     && echo "LD_LIBRARY_PATH=/container/netcdf/lib:\${LD_LIBRARY_PATH}" >> /container/config_env.sh \
-    && echo "NOT" rm -rf /container/netcdf/BUILD_DIR \
+    && rm -rf /container/netcdf/BUILD_DIR \
     && docker-clean
 
 RUN mkdir -p /container/mpich-${MPICH_VERSION} \
@@ -100,7 +103,7 @@ RUN mkdir -p /container/mpich-${MPICH_VERSION} \
     && echo -e "\n# MPICH v${MPICH_VERSION} paths" >> config_env.sh \
     && echo "export PATH=/container/mpich-${MPICH_VERSION}/install/bin:\${PATH}" >> config_env.sh \
     && echo "export LD_LIBRARY_PATH=/container/mpich-${MPICH_VERSION}/install/lib:\${LD_LIBRARY_PATH}" >> config_env.sh \
-    && echo "NOT" rm -rf /container/mpich-${MPICH_VERSION}/BUILD_DIR/ \
+    && rm -rf /container/mpich-${MPICH_VERSION}/BUILD_DIR/ \
     && docker-clean
 
 RUN whoami \
