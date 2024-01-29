@@ -1,4 +1,4 @@
-FROM benjaminkirk/ncar-derecho-wrf-build-environment:latest
+FROM benjaminkirk/ncar-derecho-wrf-nvhpc-build-environment:latest
 
 ENV WRF_VERSION 4.4.2
 ENV WPS_VERSION 4.3.1
@@ -55,17 +55,17 @@ RUN cd /container/WRF \
     && chmod +x build_wps*.sh \
     && git add build_wps*.sh
 
-RUN echo "building WRF" \
-    && /container/WRF/build_wrf.sh \
-    && cd /container/WRF && git clean -xdf . >/dev/null 2>&1 \
-    && docker-clean
+# RUN echo "building WRF" \
+#     && /container/WRF/build_wrf.sh \
+#     && cd /container/WRF && git clean -xdf . >/dev/null 2>&1 \
+#     && docker-clean
 
-RUN echo "building WRF-Chem & WPS" \
-    && /container/WRF/build_wrf_chem.sh \
-    && /container/WPS/build_wps.sh \
-    && cd /container/WRF && git clean -xdf . >/dev/null 2>&1 \
-    && cd /container/WPS && git clean -xdf . >/dev/null 2>&1 \
-    && docker-clean
+# RUN echo "building WRF-Chem & WPS" \
+#     && /container/WRF/build_wrf_chem.sh \
+#     && /container/WPS/build_wps.sh \
+#     && cd /container/WRF && git clean -xdf . >/dev/null 2>&1 \
+#     && cd /container/WPS && git clean -xdf . >/dev/null 2>&1 \
+#     && docker-clean
 
 # Local Variables:
 # mode: sh
