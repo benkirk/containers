@@ -11,6 +11,9 @@ RUN echo "zypper install of additional WRF build dependencies" \
               file flex \
               libtirpc-devel \
               libpng16-devel \
+    && zypper -n install \
+              man \
+              libtool automake autoconf \
     && docker-clean
 
 RUN mkdir -p /container && cd /container \
@@ -50,6 +53,10 @@ RUN cd /tmp \
     && echo "export NVCOMPILERS=/container/nvidia/hpc_sdk" >> config_env.sh \
     && echo "export MANPATH=\$MANPATH:\$NVCOMPILERS/\$NVARCH/${NVHPC_VERSION}/compilers/man" >> config_env.sh \
     && echo "export PATH=\$NVCOMPILERS/\$NVARCH/${NVHPC_VERSION}/compilers/bin:\$PATH" >> config_env.sh \
+    && cd /container/nvidia/hpc_sdk/Linux_x86_64/${NVHPC_VERSION} \
+    && rm_paths="comm_libs cuda math_libs profilers" \
+    && echo "Removing extra bloat: ${rm_paths}" > README.whered_stuff_go && cat README.whered_stuff_go \
+    && rm -rf ${rm_paths} \
     && docker-clean
 
 RUN mkdir -p /container/hdf5/BUILD_DIR \
@@ -105,13 +112,13 @@ RUN mkdir -p /container/netcdf/BUILD_DIR \
     && rm -rf /container/netcdf/BUILD_DIR \
     && docker-clean
 
-# autotools; required to bootstrap mpich
-RUN echo "zypper install of additional WRF build dependencies" \
-    && set -x \
-    && zypper -n install \
-              man \
-              libtool automake autoconf \
-    && docker-clean
+# # autotools; required to bootstrap mpich
+# RUN echo "zypper install of additional WRF build dependencies" \
+#     && set -x \
+#     && zypper -n install \
+#               man \
+#               libtool automake autoconf \
+#     && docker-clean
 
 # mpich-3.4.3 and nvfortran misunderstand each other regarding real*16, avoid false positive.
 # so we take the rather drastic step of modyfying configure.ac to prevent building the f08 interface,
