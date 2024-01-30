@@ -53,6 +53,14 @@ env | sort > build-env-wrfchem.log
 1
 EOF
 
+# OK, now we have a configure.wrf file.  Manually hack it up for ./chem/ usage
+# specifically, dial-down the optimization levels so than nvfortran does not hang...
+cp configure.wrf configure-wrf.chem_special
+sed -i 's/-O3/-O1/g' configure-wrf.chem_special
+sed -i 's/-O2/-O1/g' configure-wrf.chem_special
+git grep -l configure.wrf ./chem/ | xargs sed -i 's/configure.wrf/configure-wrf.chem_special/g'
+git diff ./chem/
+
 ./compile em_real 2>&1 | tee compile-wrfchem-out.log
 #./compile em_real > compile-wrfchem-out.log 2>&1 || { cat compile-wrfchem-out.log; exit 1; }
 

@@ -55,9 +55,11 @@ RUN cd /container/WRF \
     && chmod +x build_wps*.sh \
     && git add build_wps*.sh
 
-# RUN echo "building WRF" \
+# RUN echo "building WRF & WPS" \
 #     && /container/WRF/build_wrf.sh \
+#     && /container/WPS/build_wps.sh \
 #     && cd /container/WRF && git clean -xdf . >/dev/null 2>&1 \
+#     && cd /container/WPS && git clean -xdf . >/dev/null 2>&1 \
 #     && docker-clean
 
 # RUN echo "building WRF-Chem & WPS" \
