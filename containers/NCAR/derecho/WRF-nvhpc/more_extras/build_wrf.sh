@@ -46,7 +46,7 @@ env | sort > build-env-wrf.log
 
 
 ./configure <<EOF 2>&1 | tee configure-wrf-out.log
-54
+3
 1
 EOF
 

@@ -49,7 +49,7 @@ env | sort > build-env-wrfchem.log
 
 
 ./configure <<EOF 2>&1 | tee configure-wrfchem-out.log
-54
+3
 1
 EOF
 
