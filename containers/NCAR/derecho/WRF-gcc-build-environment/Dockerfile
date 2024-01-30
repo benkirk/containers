@@ -40,7 +40,7 @@ RUN mkdir -p /container/hdf5/BUILD_DIR \
     && echo -e "\n# HDF5 libraries" >> /container/config_env.sh \
     && echo "PATH=/container/hdf5/bin:\${PATH}" >> /container/config_env.sh \
     && echo "LD_LIBRARY_PATH=/container/hdf5/lib:\${LD_LIBRARY_PATH}" >> /container/config_env.sh \
-    && rm -rf /container/hdf5/BUILD \
+    && rm -rf /container/hdf5/BUILD_DIR \
     && docker-clean
 
 RUN mkdir -p /container/netcdf/BUILD_DIR \
