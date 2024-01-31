@@ -1,7 +1,7 @@
 FROM benjaminkirk/ncar-derecho-wrf-gcc-build-environment:latest
 
-ENV WRF_VERSION 4.4.2
-ENV WPS_VERSION 4.3.1
+ENV WRF_VERSION 4.5.2
+ENV WPS_VERSION 4.5
 
 ENV JASPERINC /usr/include
 ENV JASPERLIB /usr/lib64
