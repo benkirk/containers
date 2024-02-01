@@ -23,10 +23,15 @@ RUN cd /tmp \
     && gdebi --non-interactive diffmerge_4.2.0.697.stable_amd64.deb \
     && which diffmerge
 
-# RUN echo "apt extras" \
-#     && apt-get install -y \
-#                emacs \
-#     && docker-clean
+# diffuse - graphical tool for merging and comparing text files
+# fldiff - A graphical diff program
+# meld - graphical tool to diff and merge files
+# xxdiff - graphical file/directory comparison and merge tool
+RUN  apt-get install -y \
+     diffuse \
+     fldiff \
+     meld \
+     xxdiff
 
 # Local Variables:
 # mode: sh
