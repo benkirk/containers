@@ -36,7 +36,7 @@ ENV LIB_LOCAL "-lnetcdf -lnetcdff -Wl,-rpath,/container/netcdf/lib/ -Wl,-rpath,/
 RUN echo "Hacking OS layout to comply with WRF/WPS expectations..." \
     && cd /usr/include/  && ln -s libpng16/*.h . \
     && cd /usr/lib64/    && ln -s libpng{16,}.so \
-    && cd /usr/lib64/    && ln -s libflex.{so,a}
+    && cd /usr/lib64/    && ln -s libfl.{so,a}
 
 # clone WRF & WPS, check out desired versions
 RUN echo "cloning WRF-v${WRF_VERSION} & WPS-v${WPS_VERSION}" \

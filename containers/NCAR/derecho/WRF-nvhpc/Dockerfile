@@ -12,37 +12,40 @@ ENV FLEX_LIB_DIR "/usr/lib64"
 ENV YACC "/usr/bin/byacc -d"
 ENV LIB_LOCAL "-lnetcdf -lnetcdff -Wl,-rpath,/container/netcdf/lib/ -Wl,-rpath,/container/hdf5/lib/"
 
-# # Set up base OS environment
-# RUN echo "base OS environment with additional WRF dependencies" \
-#     && zypper -n install \
-#            file flex \
-#            libtirpc-devel \
-#            libpng16-devel \
-#     && docker-clean
+# # Original approach: modify  source code to match OS...
+# # https://blog.jasonmeridth.com/posts/use-git-grep-to-replace-strings-in-files-in-your-git-repository/
+# RUN cd /container \
+#     && git clone https://github.com/wrf-model/WRF.git \
+#     && cd WRF \
+#     && git fetch --all --tags \
+#     && git checkout v${WRF_VERSION} -b local/v${WRF_VERSION} \
+#     && git grep -l 'libfl.a' | xargs sed -i 's/libfl.a/libfl.so/g' \
+#     && git diff \
+#     && cd /container \
+#     && git clone https://github.com/wrf-model/WPS.git \
+#     && cd WPS \
+#     && git fetch --all --tags \
+#     && git checkout v${WPS_VERSION} -b local/v${WPS_VERSION} \
+#     && git grep -l '\-lpng' | xargs sed -i 's/-lpng /-lpng16 /g' \
+#     && git grep -l '$(COMPRESSION_INC)' | xargs sed -i 's/$(COMPRESSION_INC)/$(COMPRESSION_INC) -I\/usr\/include\/libpng16/g' \
+#     && git diff
 
-#     && ln -s /usr/lib64/libflex.{so,a} \
+# Robust but hackish approach: modify OS to match source code expectations...
+# this last one is quite silly, but works.  WRF expects a static libflex.a,
+# we only have a shared, but that's entirely adequate
+RUN echo "Hacking OS layout to comply with WRF/WPS expectations..." \
+    && cd /usr/include/  && ln -s libpng16/*.h . \
+    && cd /usr/lib64/    && ln -s libpng{16,}.so \
+    && cd /usr/lib64/    && ln -s libfl.{so,a}
 
-# https://blog.jasonmeridth.com/posts/use-git-grep-to-replace-strings-in-files-in-your-git-repository/
-RUN cd /container \
-    && git clone https://github.com/wrf-model/WRF.git \
-    && cd WRF \
+# clone WRF & WPS, check out desired versions
+RUN echo "cloning WRF-v${WRF_VERSION} & WPS-v${WPS_VERSION}" \
+    && cd /container && git clone https://github.com/wrf-model/WRF.git && cd WRF \
     && git fetch --all --tags \
     && git checkout v${WRF_VERSION} -b local/v${WRF_VERSION} \
-    && git grep -l 'libfl.a' | xargs sed -i 's/libfl.a/libfl.so/g' \
-    && git diff \
-    && cd /container \
-    && git clone https://github.com/wrf-model/WPS.git \
-    && cd WPS \
+    && cd /container && git clone https://github.com/wrf-model/WPS.git && cd WPS \
     && git fetch --all --tags \
-    && git checkout v${WPS_VERSION} -b local/v${WPS_VERSION} \
-    && git grep -l '\-lpng' | xargs sed -i 's/-lpng /-lpng16 /g' \
-    && git grep -l '$(COMPRESSION_INC)' | xargs sed -i 's/$(COMPRESSION_INC)/$(COMPRESSION_INC) -I\/usr\/include\/libpng16/g' \
-    && git diff
-
-#     && find . -name Makefile | xargs sed -i 's/CFLAGS="$(CFLAGS)/CFLAGS="$(CFLAGS) $(EXTRA_WPS_CFLAGS)/g' \
-#     && find . -name Makefile | xargs sed -i 's/FFLAGS="$(FFLAGS)/FFLAGS="$(FFLAGS) $(EXTRA_WPS_FFLAGS)/g' \
-#     && find . -name Makefile | xargs sed -i 's/CPPFLAGS="$(CPPFLAGS)/CPPFLAGS="$(CPPFLAGS) $(EXTRA_WPS_CPPFLAGS)/g' \
-#     && find . -name Makefile | xargs sed -i 's/LDFLAGS="$(LDFLAGS)/LDFLAGS="$(LDFLAGS) $(EXTRA_WPS_LDFLAGS)/g' \
+    && git checkout v${WPS_VERSION} -b local/v${WPS_VERSION}
 
 ADD extras/build_wrf.sh      /container/WRF/build_wrf.sh
 ADD extras/build_wrf_chem.sh /container/WRF/build_wrf_chem.sh
