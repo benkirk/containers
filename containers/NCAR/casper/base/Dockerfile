@@ -18,9 +18,13 @@ RUN echo "basic zypper setup" \
     && useradd plainuser  \
     && zypper --non-interactive refresh \
     && zypper --non-interactive update \
+    && mkdir -p /container \
     && docker-clean
 
 CMD which ls && ls /usr && find /usr
+
+# archive this Dockerfile in the image
+ADD extras/Dockerfile.* /container/
 
 # Local Variables:
 # mode: sh

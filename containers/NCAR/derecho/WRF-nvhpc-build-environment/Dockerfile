@@ -11,8 +11,8 @@ RUN echo "zypper install of additional WRF build dependencies" \
               file flex \
               libtirpc-devel \
               libpng16-devel \
+              rsync \
     && zypper -n install \
-              man \
               libtool automake autoconf \
     && docker-clean
 
@@ -25,20 +25,8 @@ ENV MPICH_VERSION=3.4.3
 ENV HDF5_VERSION=1.10.11
 ENV NETCDF_C_VERSION=4.9.2
 ENV NETCDF_FORTRAN_VERSION=4.6.1
-
-# ENV NVHPC_VERSION=20.11
-# RUN echo "Installing NVHPC v${NVHPC_VERSION}" \
-#     && zypper addrepo https://developer.download.nvidia.com/hpc-sdk/sles/nvhpc.repo \
-#     && zypper --gpg-auto-import-keys install -y nvhpc-${NVHPC_VERSION} \
-#     && cd /container \
-#     && echo -e "\n# NVHPC version ${NVHPC_VERSION}" >> config_env.sh \
-#     && echo "export NVARCH=`uname -s`_`uname -m`" >> config_env.sh \
-#     && echo "export NVCOMPILERS=/opt/nvidia/hpc_sdk" >> config_env.sh \
-#     && echo "export MANPATH=\$MANPATH:\$NVCOMPILERS/\$NVARCH/${NVHPC_VERSION}/compilers/man" >> config_env.sh \
-#     && echo "export PATH=\$NVCOMPILERS/\$NVARCH/${NVHPC_VERSION}/compilers/bin:\$PATH" >> config_env.sh \
-#     && docker-clean
-
 ENV NVHPC_VERSION=23.9
+
 RUN cd /tmp \
     && echo "Downloading NVHPC v${NVHPC_VERSION}" \
     && curl -sSL https://developer.download.nvidia.com/hpc-sdk/23.9/nvhpc_2023_239_Linux_x86_64_cuda_12.2.tar.gz | tar zx \
@@ -112,48 +100,40 @@ RUN mkdir -p /container/netcdf/BUILD_DIR \
     && rm -rf /container/netcdf/BUILD_DIR \
     && docker-clean
 
-# # autotools; required to bootstrap mpich
-# RUN echo "zypper install of additional WRF build dependencies" \
-#     && set -x \
-#     && zypper -n install \
-#               man \
-#               libtool automake autoconf \
-#     && docker-clean
-
 # mpich-3.4.3 and nvfortran misunderstand each other regarding real*16, avoid false positive.
 # so we take the rather drastic step of modyfying configure.ac to prevent building the f08 interface,
 # no matter what configure *thinks* it finds...
-RUN mkdir -p /container/mpich-${MPICH_VERSION} \
-    && cd /container/mpich-${MPICH_VERSION} \
+RUN mkdir -p /container/mpich/BUILD_DIR \
+    && cd /container/mpich/BUILD_DIR \
     && source /container/config_env.sh \
     && curl -sSL http://www.mpich.org/static/downloads/${MPICH_VERSION}/mpich-${MPICH_VERSION}.tar.gz | tar zx \
-    && mv mpich-${MPICH_VERSION} BUILD_DIR && cd BUILD_DIR \
+    && cd mpich-${MPICH_VERSION} \
     && sed -i 's/f08_works=yes/f08_works=no/g' configure.ac \
     && ./autogen.sh \
     && ./configure \
            CXX=$(which g++) CC=$(which gcc) FC=$(which nvfortran) F77=$(which nvfortran) \
            CXXFLAGS="-fPIC" CFLAGS="-fPIC" FFLAGS="-fPIC" FCFLAGS="-fPIC" \
-           --prefix=/container/mpich-${MPICH_VERSION}/install \
+           --prefix=/container/mpich \
            --with-wrapper-dl-type=none \
            --with-device=ch4:ofi \
-           --enable-fortran --disable-cxx
-
-RUN cd /container/mpich-${MPICH_VERSION}/BUILD_DIR/ \
+           --enable-fortran --disable-cxx | tee /container/mpich/configure-out.log \
     && make -j 8 install \
-    && cd /container/ && rm -rf /container/mpich-${MPICH_VERSION}/BUILD_DIR/ \
-    && echo -e "\n# MPICH v${MPICH_VERSION} paths" >> config_env.sh \
-    && echo "export PATH=/container/mpich-${MPICH_VERSION}/install/bin:\${PATH}" >> config_env.sh \
-    && echo "export LD_LIBRARY_PATH=/container/mpich-${MPICH_VERSION}/install/lib:\${LD_LIBRARY_PATH}" >> config_env.sh \
-    && rm -rf /container/mpich-${MPICH_VERSION}/BUILD_DIR/ \
+    && echo -e "\n# MPICH v${MPICH_VERSION} paths" >> /container/config_env.sh \
+    && echo "export PATH=/container/mpich/bin:\${PATH}" >> /container/config_env.sh \
+    && echo "export LD_LIBRARY_PATH=/container/mpich/lib:\${LD_LIBRARY_PATH}" >> /container/config_env.sh \
+    && rm -rf /container/mpich/BUILD_DIR/ \
     && docker-clean
 
-# # # restore if we enable-cxx in MPICH
-# # RUN whoami \
-# #     && sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /container/mpich-${MPICH_VERSION}/install/bin/mpicxx
+# # restore if we enable-cxx in MPICH
+# RUN whoami \
+#     && sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /container/mpich/bin/mpicxx
 
 RUN cd /etc/profile.d/ \
     && ln -s /container/config_env.sh ./z00-build-env.sh \
     && docker-clean
+
+# archive this Dockerfile in the image
+ADD extras/Dockerfile.* /container/
 
 # Local Variables:
 # mode: sh

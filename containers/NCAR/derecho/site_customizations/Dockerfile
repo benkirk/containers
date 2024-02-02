@@ -16,6 +16,9 @@ RUN mkdir -p /local_scratch \
     && mkdir -p /glade/{u,work,scratch,p,campaign,collections,cheyenne/scratch,derecho/scratch} \
     && find /glade -type d
 
+# archive this Dockerfile in the image
+ADD extras/Dockerfile.* /container/
+
 # Local Variables:
 # mode: sh
 # End:

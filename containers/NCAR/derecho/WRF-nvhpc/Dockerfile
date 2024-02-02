@@ -67,6 +67,9 @@ RUN echo "building WRF-Chem & WPS" \
     && cd /container/WPS && git clean -xdf . >/dev/null 2>&1 \
     && docker-clean
 
+# archive this Dockerfile in the image
+ADD extras/Dockerfile.* /container/
+
 # Local Variables:
 # mode: sh
 # End:

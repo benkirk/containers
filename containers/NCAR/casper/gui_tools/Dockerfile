@@ -26,6 +26,9 @@ RUN echo "zypper install of visual diff tools" \
               tkdiff \
     && docker-clean
 
+# archive this Dockerfile in the image
+ADD extras/Dockerfile.* /container/
+
 # Local Variables:
 # mode: sh
 # End:

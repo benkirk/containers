@@ -16,6 +16,10 @@ export WRFIO_NCD_LARGE_FILE_SUPPORT=1
 
 git clean -xdf .
 
+outdir=/container/wrf-${WRF_VERSION}
+rm -rf ${outdir} && mkdir -p ${outdir} || exit 1
+rsync -ax ./run/ ${outdir}/
+
 env | sort > build-env-wrf.log
 
 # ------------------------------------------------------------------------
@@ -46,7 +50,7 @@ env | sort > build-env-wrf.log
 
 
 ./configure <<EOF 2>&1 | tee configure-wrf-out.log
-3
+4
 1
 EOF
 
@@ -54,9 +58,6 @@ EOF
 #./compile em_real > compile-wrf-out.log 2>&1 || { cat compile-wrf-out.log; exit 1; }
 
 set -x
-outdir=/container/wrf-${WRF_VERSION}
-mkdir -p ${outdir} || exit 1
-
 for file in main/*.exe *.log configure.wrf; do
     cp -r ${file} ${outdir}/
 done

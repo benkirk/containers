@@ -47,10 +47,12 @@ clobber:
 	$(MAKE) clean
 	rm -rf ./extras
 
-extras: $(top_dir)/extras
-	cp -r $< $@
-	if [ -d ../more_extras/ ]; then cp -r ../more_extras/* ./extras/; fi
-	if [ -d ./more_extras/  ]; then cp -r ./more_extras/* ./extras/; fi
+extras: $(top_dir)/extras Makefile Dockerfile
+	rm -rf $@
+	cp -r $< $@/
+	cp Dockerfile $@/Dockerfile.$(label)
+	if [ -d ../more_extras/ ]; then cp -r ../more_extras/* ./$@/; fi
+	if [ -d ./more_extras/  ]; then cp -r ./more_extras/* ./$@/; fi
 
 run:
 	@if [ -d ./shared_volume/ ]; then DOCKER_SHARED_VOLUME_ARGS="--volume $(this_dir)/shared_volume:/sv"; fi; \

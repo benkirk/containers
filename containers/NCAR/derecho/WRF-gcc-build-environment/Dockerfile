@@ -11,6 +11,7 @@ RUN echo "zypper install of additional WRF build dependencies" \
               file flex \
               libtirpc-devel \
               libpng16-devel \
+              rsync \
     && docker-clean
 
 RUN mkdir -p /container && cd /container \
@@ -73,31 +74,33 @@ RUN mkdir -p /container/netcdf/BUILD_DIR \
     && rm -rf /container/netcdf/BUILD_DIR \
     && docker-clean
 
-RUN mkdir -p /container/mpich-${MPICH_VERSION} \
-    && cd /container/mpich-${MPICH_VERSION} \
+RUN mkdir -p /container/mpich/BUILD_DIR \
+    && cd /container/mpich/BUILD_DIR \
     && source /container/config_env.sh \
     && curl -sSL http://www.mpich.org/static/downloads/${MPICH_VERSION}/mpich-${MPICH_VERSION}.tar.gz | tar zx \
-    && mv mpich-${MPICH_VERSION} BUILD_DIR && cd BUILD_DIR \
+    && cd mpich-${MPICH_VERSION} \
     && ./configure CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
-                   --prefix=/container/mpich-${MPICH_VERSION}/install \
+                   --prefix=/container/mpich \
                    --with-wrapper-dl-type=none \
                    --with-device=ch4:ofi \
-                   --enable-fortran --disable-cxx \
+                   --enable-fortran --disable-cxx | tee /container/mpich/configure-out.log \
     && make -j 8 install \
-    && cd /container/ && rm -rf /container/mpich-${MPICH_VERSION}/BUILD_DIR/ \
-    && echo -e "\n# MPICH v${MPICH_VERSION} paths" >> config_env.sh \
-    && echo "export PATH=/container/mpich-${MPICH_VERSION}/install/bin:\${PATH}" >> config_env.sh \
-    && echo "export LD_LIBRARY_PATH=/container/mpich-${MPICH_VERSION}/install/lib:\${LD_LIBRARY_PATH}" >> config_env.sh \
-    && rm -rf /container/mpich-${MPICH_VERSION}/BUILD_DIR/ \
+    && echo -e "\n# MPICH v${MPICH_VERSION} paths" >> /container/config_env.sh \
+    && echo "export PATH=/container/mpich/bin:\${PATH}" >> /container/config_env.sh \
+    && echo "export LD_LIBRARY_PATH=/container/mpich/lib:\${LD_LIBRARY_PATH}" >> /container/config_env.sh \
+    && rm -rf /container/mpich/BUILD_DIR/ \
     && docker-clean
 
 # # restore if we enable-cxx in MPICH
 # RUN whoami \
-#     && sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /container/mpich-${MPICH_VERSION}/install/bin/mpicxx
+#     && sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /container/mpich/bin/mpicxx
 
 RUN cd /etc/profile.d/ \
     && ln -s /container/config_env.sh ./z00-build-env.sh \
     && docker-clean
+
+# archive this Dockerfile in the image
+ADD extras/Dockerfile.* /container/
 
 # Local Variables:
 # mode: sh

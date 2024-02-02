@@ -19,6 +19,10 @@ export WRF_NMM_CORE=0
 
 git clean -xdf .
 
+outdir=/container/wrf-chem-${WRF_VERSION}
+rm -rf ${outdir} && mkdir -p ${outdir} || exit 1
+rsync -ax ./run/ ${outdir}/
+
 env | sort > build-env-wrfchem.log
 
 # ------------------------------------------------------------------------
@@ -57,9 +61,6 @@ EOF
 #./compile em_real > compile-wrfchem-out.log 2>&1 || { cat compile-wrfchem-out.log; exit 1; }
 
 set -x
-outdir=/container/wrf-chem-${WRF_VERSION}
-mkdir -p ${outdir} || exit 1
-
 for file in main/*.exe *.log configure.wrf; do
     cp -r ${file} ${outdir}/
 done
