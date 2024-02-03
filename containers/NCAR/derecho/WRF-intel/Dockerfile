@@ -10,7 +10,7 @@ ENV NETCDF /container/netcdf
 
 ENV FLEX_LIB_DIR "/usr/lib64"
 ENV YACC "/usr/bin/byacc -d"
-ENV LIB_LOCAL "-lnetcdf -lnetcdff -Wl,-rpath,/container/netcdf/lib/ -Wl,-rpath,/container/hdf5/lib/ -Wl,-rpath,/container/intel/compiler/2022.2.1/linux/lib -Wl,rpath,/container/intel/compiler/2022.2.1/linux/lib/x64 -Wl,-rpath,/container/intel/compiler/2022.2.1/linux/compiler/lib/intel64_lin"
+ENV LIB_LOCAL "-lnetcdf -lnetcdff -Wl,-rpath,/container/netcdf/lib/ -Wl,-rpath,/container/hdf5/lib/ -Wl,-rpath,/container/intel/compiler/2022.2.1/linux/lib -Wl,-rpath,/container/intel/compiler/2022.2.1/linux/lib/x64 -Wl,-rpath,/container/intel/compiler/2022.2.1/linux/compiler/lib/intel64_lin"
 
 # Robust but hackish approach: modify OS to match source code expectations...
 # this last one is quite silly, but works.  WRF-Chem expects a static libfl.a,
