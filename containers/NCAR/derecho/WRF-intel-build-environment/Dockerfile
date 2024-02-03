@@ -35,7 +35,7 @@ RUN mkdir -p /tmp/intel_installers && cd /tmp/intel_installers \
     && cd /container/intel \
     && rm_paths="mpi debugger tbb conda_channel" \
     && echo "Removing extra bloat: ${rm_paths}" > README.whered_stuff_go && cat README.whered_stuff_go \
-    && rm -rf /tmp/intel_installers \
+    && rm -rf /tmp/intel_installers /var/intel \
     && echo -e "\n# Intel compilers libraries" >> /container/config_env.sh \
     && echo "source /container/intel/setvars.sh >/dev/null 2>&1" >> /container/config_env.sh \
     && docker-clean
