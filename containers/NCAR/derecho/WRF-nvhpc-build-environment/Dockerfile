@@ -44,6 +44,8 @@ RUN cd /tmp \
     && cd /container/nvidia/hpc_sdk/Linux_x86_64/${NVHPC_VERSION} \
     && rm_paths="comm_libs cuda math_libs profilers" \
     && echo "Removing extra bloat: ${rm_paths}" > README.whered_stuff_go && cat README.whered_stuff_go \
+    && echo "/container/nvidia/hpc_sdk/Linux_x86_64/${NVHPC_VERSION}/compilers/lib" >> /etc/ld.so.conf.d/nvhpc.conf \
+    && ldconfig --verbose \
     && rm -rf ${rm_paths} \
     && docker-clean
 
@@ -65,6 +67,8 @@ RUN mkdir -p /container/hdf5/BUILD_DIR \
     && echo -e "\n# HDF5 libraries" >> /container/config_env.sh \
     && echo "PATH=/container/hdf5/bin:\${PATH}" >> /container/config_env.sh \
     && echo "LD_LIBRARY_PATH=/container/hdf5/lib:\${LD_LIBRARY_PATH}" >> /container/config_env.sh \
+    && echo "/container/hdf5/lib" >> /etc/ld.so.conf.d/hdf5.conf \
+    && ldconfig --verbose \
     && rm -rf /container/hdf5/BUILD_DIR \
     && docker-clean
 
@@ -78,7 +82,7 @@ RUN mkdir -p /container/netcdf/BUILD_DIR \
            CXX=$(which g++) CC=$(which gcc) FC=$(which nvfortran) F77=$(which nvfortran) \
            CXXFLAGS="-fPIC" CFLAGS="-fPIC" FFLAGS="-fPIC" FCFLAGS="-fPIC" \
            CPPFLAGS="-I/container/hdf5/include" \
-           LDFLAGS="-L/container/hdf5/lib -Wl,-rpath,/container/hdf5/lib" \
+           LDFLAGS="-L/container/hdf5/lib" \
            --prefix=/container/netcdf \
            --disable-libxml2 \
            --disable-dap \
@@ -91,12 +95,14 @@ RUN mkdir -p /container/netcdf/BUILD_DIR \
            CXX=$(which g++) CC=$(which gcc) FC=$(which nvfortran) F77=$(which nvfortran) \
            CXXFLAGS="-fPIC" CFLAGS="-fPIC" FFLAGS="-fPIC" FCFLAGS="-fPIC" \
            CPPFLAGS="-I/container/netcdf/include -I/container/hdf5/include" \
-           LDFLAGS="-L/container/netcdf/lib -Wl,-rpath,/container/netcdf/lib -L/container/hdf5/lib -Wl,-rpath,/container/hdf5/lib" \
+           LDFLAGS="-L/container/netcdf/lib -L/container/hdf5/lib" \
            --prefix=/container/netcdf \
            --disable-dap \
     && make -j 4 && make install \
     && echo -e "\n# NETCDF libraries" >> /container/config_env.sh && echo "PATH=/container/netcdf/bin:\${PATH}" >> /container/config_env.sh \
     && echo "LD_LIBRARY_PATH=/container/netcdf/lib:\${LD_LIBRARY_PATH}" >> /container/config_env.sh \
+    && echo "/container/netcdf/lib" >> /etc/ld.so.conf.d/netcdf.conf \
+    && ldconfig --verbose \
     && rm -rf /container/netcdf/BUILD_DIR \
     && docker-clean
 
@@ -134,6 +140,16 @@ RUN cd /etc/profile.d/ \
 
 # archive this Dockerfile in the image
 ADD extras/Dockerfile.* /container/
+
+# environment variables useful for WRF build
+ENV JASPERINC /usr/include
+ENV JASPERLIB /usr/lib64
+ENV HDF5 /container/hdf5
+ENV NETCDF /container/netcdf
+
+ENV FLEX_LIB_DIR "/usr/lib64"
+ENV YACC "/usr/bin/byacc -d"
+ENV LIB_LOCAL "-lnetcdf -lnetcdff"
 
 # Local Variables:
 # mode: sh

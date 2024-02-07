@@ -33,14 +33,19 @@ RUN mkdir -p /tmp/intel_installers && cd /tmp/intel_installers \
     && ./l_dpcpp-cpp-compiler_p_2022.2.1.16991_offline.sh -a -s --eula accept --install-dir /container/intel --ignore-errors \
     && ./l_fortran-compiler_p_2022.2.1.16992_offline.sh -a -s --eula accept --install-dir /container/intel --ignore-errors \
     && cd /container/intel \
-    && rm_paths="mpi debugger tbb conda_channel" \
+    && rm_paths="mpi debugger tbb conda_channel compiler/2022.2.1/linux/lib/oclfpga" \
     && echo "Removing extra bloat: ${rm_paths}" > README.whered_stuff_go && cat README.whered_stuff_go \
     && rm -rf ${rm_paths} /tmp/intel_installers /var/intel \
     && echo -e "\n# Intel compilers libraries" >> /container/config_env.sh \
     && echo "source /container/intel/setvars.sh >/dev/null 2>&1" >> /container/config_env.sh \
     && docker-clean
 
-RUN echo "silence classic compilers" \
+RUN echo "Intel compilers cannot find their own libraries without LD_LIBRARY_PATH, add to the system search path" \
+    && echo "/container/intel/compiler/2022.2.1/linux/lib"     >> /etc/ld.so.conf.d/intel.conf \
+    && echo "/container/intel/compiler/2022.2.1/linux/lib/x64" >> /etc/ld.so.conf.d/intel.conf \
+    && echo "/container/intel/compiler/2022.2.1/linux/compiler/lib/intel64_lin" >> /etc/ld.so.conf.d/intel.conf \
+    && ldconfig --verbose \
+    && echo "silence classic compilers" \
     && echo "-diag-disable=10441" >> /container/intel/compiler/2022.2.1/linux/bin/intel64/icc.cfg \
     && echo "-diag-disable=10441" >> /container/intel/compiler/2022.2.1/linux/bin/intel64/icpc.cfg \
     && echo "-diag-disable=10441" >> /container/intel/compiler/2022.2.1/linux/bin/intel64/ifort.cfg
@@ -67,6 +72,8 @@ RUN mkdir -p /container/hdf5/BUILD_DIR \
     && echo -e "\n# HDF5 libraries" >> /container/config_env.sh \
     && echo "PATH=/container/hdf5/bin:\${PATH}" >> /container/config_env.sh \
     && echo "LD_LIBRARY_PATH=/container/hdf5/lib:\${LD_LIBRARY_PATH}" >> /container/config_env.sh \
+    && echo "/container/hdf5/lib" >> /etc/ld.so.conf.d/hdf5.conf \
+    && ldconfig --verbose \
     && rm -rf /container/hdf5/BUILD_DIR \
     && docker-clean
 
@@ -79,7 +86,7 @@ RUN mkdir -p /container/netcdf/BUILD_DIR \
     && ./configure \
            CXX=$(which icpc) CC=$(which icc) FC=$(which ifort) F77=$(which ifort) \
            CPPFLAGS="-I/container/hdf5/include" \
-           LDFLAGS="-L/container/hdf5/lib -Wl,-rpath,/container/hdf5/lib" \
+           LDFLAGS="-L/container/hdf5/lib" \
            --prefix=/container/netcdf \
            --disable-libxml2 \
            --disable-dap \
@@ -91,12 +98,14 @@ RUN mkdir -p /container/netcdf/BUILD_DIR \
     && ./configure \
            CXX=$(which icpc) CC=$(which icc) FC=$(which ifort) F77=$(which ifort) \
            CPPFLAGS="-I/container/netcdf/include -I/container/hdf5/include" \
-           LDFLAGS="-L/container/netcdf/lib -Wl,-rpath,/container/netcdf/lib -L/container/hdf5/lib -Wl,-rpath,/container/hdf5/lib" \
+           LDFLAGS="-L/container/netcdf/lib -L/container/hdf5/lib" \
            --prefix=/container/netcdf \
            --disable-dap \
     && make -j 4 && make install \
     && echo -e "\n# NETCDF libraries" >> /container/config_env.sh && echo "PATH=/container/netcdf/bin:\${PATH}" >> /container/config_env.sh \
     && echo "LD_LIBRARY_PATH=/container/netcdf/lib:\${LD_LIBRARY_PATH}" >> /container/config_env.sh \
+    && echo "/container/netcdf/lib" >> /etc/ld.so.conf.d/netcdf.conf \
+    && ldconfig --verbose \
     && rm -rf /container/netcdf/BUILD_DIR \
     && docker-clean
 
@@ -127,6 +136,16 @@ RUN cd /etc/profile.d/ \
 
 # archive this Dockerfile in the image
 ADD extras/Dockerfile.* /container/
+
+# environment variables useful for WRF build
+ENV JASPERINC /usr/include
+ENV JASPERLIB /usr/lib64
+ENV HDF5 /container/hdf5
+ENV NETCDF /container/netcdf
+
+ENV FLEX_LIB_DIR "/usr/lib64"
+ENV YACC "/usr/bin/byacc -d"
+ENV LIB_LOCAL "-lnetcdf -lnetcdff"
 
 # Local Variables:
 # mode: sh

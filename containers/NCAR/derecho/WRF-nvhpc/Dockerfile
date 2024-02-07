@@ -3,15 +3,6 @@ FROM benjaminkirk/ncar-derecho-wrf-nvhpc-build-environment:latest
 ENV WRF_VERSION 4.5.2
 ENV WPS_VERSION 4.5
 
-ENV JASPERINC /usr/include
-ENV JASPERLIB /usr/lib64
-ENV HDF5 /container/hdf5
-ENV NETCDF /container/netcdf
-
-ENV FLEX_LIB_DIR "/usr/lib64"
-ENV YACC "/usr/bin/byacc -d"
-ENV LIB_LOCAL "-lnetcdf -lnetcdff -Wl,-rpath,/container/netcdf/lib/ -Wl,-rpath,/container/hdf5/lib/ -Wl,-rpath,/container/nvidia/hpc_sdk/Linux_x86_64/23.9/compilers/lib/"
-
 # # Original approach: modify  source code to match OS...
 # # https://blog.jasonmeridth.com/posts/use-git-grep-to-replace-strings-in-files-in-your-git-repository/
 # RUN cd /container \

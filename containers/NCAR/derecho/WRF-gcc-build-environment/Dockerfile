@@ -41,6 +41,8 @@ RUN mkdir -p /container/hdf5/BUILD_DIR \
     && echo -e "\n# HDF5 libraries" >> /container/config_env.sh \
     && echo "PATH=/container/hdf5/bin:\${PATH}" >> /container/config_env.sh \
     && echo "LD_LIBRARY_PATH=/container/hdf5/lib:\${LD_LIBRARY_PATH}" >> /container/config_env.sh \
+    && echo "/container/hdf5/lib" >> /etc/ld.so.conf.d/hdf5.conf \
+    && ldconfig --verbose \
     && rm -rf /container/hdf5/BUILD_DIR \
     && docker-clean
 
@@ -53,7 +55,7 @@ RUN mkdir -p /container/netcdf/BUILD_DIR \
     && ./configure \
            CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
            CPPFLAGS="-I/container/hdf5/include" \
-           LDFLAGS="-L/container/hdf5/lib -Wl,-rpath,/container/hdf5/lib" \
+           LDFLAGS="-L/container/hdf5/lib" \
            --prefix=/container/netcdf \
            --disable-libxml2 \
            --disable-dap \
@@ -65,12 +67,14 @@ RUN mkdir -p /container/netcdf/BUILD_DIR \
     && ./configure \
            CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
            CPPFLAGS="-I/container/netcdf/include -I/container/hdf5/include" \
-           LDFLAGS="-L/container/netcdf/lib -Wl,-rpath,/container/netcdf/lib -L/container/hdf5/lib -Wl,-rpath,/container/hdf5/lib" \
+           LDFLAGS="-L/container/netcdf/lib -L/container/hdf5/lib" \
            --prefix=/container/netcdf \
            --disable-dap \
     && make -j 4 && make install \
     && echo -e "\n# NETCDF libraries" >> /container/config_env.sh && echo "PATH=/container/netcdf/bin:\${PATH}" >> /container/config_env.sh \
     && echo "LD_LIBRARY_PATH=/container/netcdf/lib:\${LD_LIBRARY_PATH}" >> /container/config_env.sh \
+    && echo "/container/netcdf/lib" >> /etc/ld.so.conf.d/netcdf.conf \
+    && ldconfig --verbose \
     && rm -rf /container/netcdf/BUILD_DIR \
     && docker-clean
 
@@ -101,6 +105,16 @@ RUN cd /etc/profile.d/ \
 
 # archive this Dockerfile in the image
 ADD extras/Dockerfile.* /container/
+
+# environment variables useful for WRF build
+ENV JASPERINC /usr/include
+ENV JASPERLIB /usr/lib64
+ENV HDF5 /container/hdf5
+ENV NETCDF /container/netcdf
+
+ENV FLEX_LIB_DIR "/usr/lib64"
+ENV YACC "/usr/bin/byacc -d"
+ENV LIB_LOCAL "-lnetcdf -lnetcdff"
 
 # Local Variables:
 # mode: sh
