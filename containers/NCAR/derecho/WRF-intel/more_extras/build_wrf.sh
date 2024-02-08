@@ -5,8 +5,7 @@
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 #----------------------------------------------------------------------------
 
-cd ${SCRIPTDIR} || exit 1
-
+cd ${SCRIPTDIR} &&  echo "Building WRF in $(pwd)" || exit 1
 
 [ -f /container/config_env.sh ] && . /container/config_env.sh
 
@@ -53,6 +52,15 @@ env | sort > build-env-wrf.log
 16
 1
 EOF
+
+# replace bad optimization architecture flags
+# (ref: https://ncar-hpc-docs.readthedocs.io/en/latest/compute-systems/derecho/compiling-code-on-derecho/#optimizing-your-code-with-intel-compilers)
+sed -i 's/ -xHost/ -march=core-avx2/g' configure.wrf
+sed -i 's/ -axHost/ -march=core-avx2/g' configure.wrf
+sed -i 's/ -xCORE-AVX2/ -march=core-avx2/g' configure.wrf
+sed -i 's/ -axCORE-AVX2/ -march=core-avx2/g' configure.wrf
+sed -i 's/-O3/-O3 -march=core-avx2/g' configure.wrf
+sed -i 's/-O2/-O2 -march=core-avx2/g' configure.wrf
 
 ./compile em_real 2>&1 | tee compile-wrf-out.log
 #./compile em_real > compile-wrf-out.log 2>&1 || { cat compile-wrf-out.log; exit 1; }

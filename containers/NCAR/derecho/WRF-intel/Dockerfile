@@ -1,7 +1,9 @@
 FROM benjaminkirk/ncar-derecho-wrf-intel-build-environment:latest
 
-ENV WRF_VERSION 4.5.2
-ENV WPS_VERSION 4.5
+# set versions of embedded build, but not as environment variables
+# as the resulting container could be used to support many versions
+ARG WRF_VERSION=4.5.2
+ARG WPS_VERSION=4.5
 
 # Robust but hackish approach: modify OS to match source code expectations...
 # this last one is quite silly, but works.  WRF-Chem expects a static libfl.a,
@@ -32,16 +34,19 @@ RUN cd /container/WRF \
     && git add build_wps*.sh
 
 RUN echo "building WRF" \
-    && /container/WRF/build_wrf.sh \
+    && cd /container/WRF && ./build_wrf.sh \
     && cd /container/WRF && git clean -xdf . >/dev/null 2>&1 \
     && docker-clean
 
 RUN echo "building WRF-Chem & WPS" \
-    && /container/WRF/build_wrf_chem.sh \
-    && /container/WPS/build_wps.sh \
+    && cd /container/WRF && ./build_wrf_chem.sh \
+    && cd /container/WPS && ./build_wps.sh \
     && cd /container/WRF && git clean -xdf . >/dev/null 2>&1 \
     && cd /container/WPS && git clean -xdf . >/dev/null 2>&1 \
     && docker-clean
+
+# Ok, all done - let's indicate the environment
+RUN echo -e "\nPS1=\"WRF-ifort-env> \"" >> /container/config_env.sh
 
 # archive this Dockerfile in the image
 ADD extras/Dockerfile.* /container/

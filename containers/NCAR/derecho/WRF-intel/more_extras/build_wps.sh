@@ -5,7 +5,7 @@
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 #----------------------------------------------------------------------------
 
-cd ${SCRIPTDIR} || exit 1
+cd ${SCRIPTDIR} && echo "Building WPS in $(pwd)" || exit 1
 
 [ -f /container/config_env.sh ] && . /container/config_env.sh
 
