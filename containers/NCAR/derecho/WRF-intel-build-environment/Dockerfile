@@ -12,6 +12,8 @@ RUN echo "zypper install of additional WRF build dependencies" \
               libtirpc-devel \
               libpng16-devel \
               rsync \
+    && zypper -n install \
+              libtool automake autoconf \
     && docker-clean
 
 RUN mkdir -p /container && cd /container \

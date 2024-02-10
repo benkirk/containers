@@ -20,7 +20,12 @@ RUN mkdir -p /local_scratch \
 # archive this Dockerfile in the image
 ADD extras/Dockerfile.* /container/
 
+# ADD rpmlist /container/
 #
+# RUN zypper --non-interactive install \
+#            $(cat /container/rpmlist) \
+#     && docker-clean
+
 # RUN ln -s /sw/dot_spack /home/plainuser/.spack
 # RUN chown -R plainuser: /home/plainuser/
 # USER plainuser

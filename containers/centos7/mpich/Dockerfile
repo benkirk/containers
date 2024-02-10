@@ -10,7 +10,9 @@ RUN echo "yum/dnf tweaks" \
     && mkdir /opt/local \
     && yum update -y \
     && yum groupinstall -y "Development Tools" \
-    && yum install -y gcc gcc-c++ wget git chrpath which \
+    && yum install -y \
+           gcc gcc-c++ gcc-gfortran wget git chrpath which \
+           libtool automake autoconf \
     && docker-clean \
     && adduser plainuser && mkdir -p /opt/local && chown plainuser: /opt/local
 
