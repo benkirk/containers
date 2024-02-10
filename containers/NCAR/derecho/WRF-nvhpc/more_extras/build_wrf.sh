@@ -5,8 +5,7 @@
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 #----------------------------------------------------------------------------
 
-cd ${SCRIPTDIR} || exit 1
-
+cd ${SCRIPTDIR} && echo "Building WRF in $(pwd)" || exit 1
 
 [ -f /container/config_env.sh ] && . /container/config_env.sh
 
@@ -53,6 +52,20 @@ env | sort > build-env-wrf.log
 4
 1
 EOF
+
+# WRFv3 requires linking with the XDR API, on OpenSUSE that's -ltirpc
+case "${WRF_VERSION}" in
+    3.*)
+        echo "appending -ltirpc to libs..."
+        sed -i 's/-lnetcdff -lnetcdf/-lnetcdff -lnetcdf -ltirpc/g' configure.wrf
+        ;;
+    *)
+        ;;
+esac
+
+# add optimization architecture flags
+sed -i 's/FCOPTIM         =       -O3/FCOPTIM         =       -O3 -tp=znver3/g' configure.wrf
+sed -i 's/FCOPTIM         =       -O2/FCOPTIM         =       -O2 -tp=znver3/g' configure.wrf
 
 ./compile em_real 2>&1 | tee compile-wrf-out.log
 #./compile em_real > compile-wrf-out.log 2>&1 || { cat compile-wrf-out.log; exit 1; }

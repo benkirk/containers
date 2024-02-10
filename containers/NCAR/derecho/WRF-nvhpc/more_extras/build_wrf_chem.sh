@@ -5,7 +5,7 @@
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 #----------------------------------------------------------------------------
 
-cd ${SCRIPTDIR} || exit 1
+cd ${SCRIPTDIR} && echo "Building WRF-Chem in $(pwd)" || exit 1
 
 [ -f /container/config_env.sh ] && . /container/config_env.sh
 
@@ -57,6 +57,16 @@ env | sort > build-env-wrfchem.log
 1
 EOF
 
+# WRFv3 requires linking with the XDR API, on OpenSUSE that's -ltirpc
+case "${WRF_VERSION}" in
+    3.*)
+        echo "appending -ltirpc to libs..."
+        sed -i 's/-lnetcdff -lnetcdf/-lnetcdff -lnetcdf -ltirpc/g' configure.wrf
+        ;;
+    *)
+        ;;
+esac
+
 # OK, now we have a configure.wrf file.  Manually hack it up for ./chem/ usage
 # specifically, dial-down the optimization levels so than nvfortran does not hang...
 cp configure.wrf configure-wrf.chem_special
@@ -64,6 +74,11 @@ sed -i 's/-O3/-O1/g' configure-wrf.chem_special
 sed -i 's/-O2/-O1/g' configure-wrf.chem_special
 git grep -l configure.wrf ./chem/ | xargs sed -i 's/configure.wrf/configure-wrf.chem_special/g'
 git diff ./chem/
+
+# add optimization architecture flags
+# add optimization architecture flags
+sed -i 's/FCOPTIM         =       -O3/FCOPTIM         =       -O3 -tp=znver3/g' configure.wrf
+sed -i 's/FCOPTIM         =       -O2/FCOPTIM         =       -O2 -tp=znver3/g' configure.wrf
 
 ./compile em_real 2>&1 | tee compile-wrfchem-out.log
 #./compile em_real > compile-wrfchem-out.log 2>&1 || { cat compile-wrfchem-out.log; exit 1; }
