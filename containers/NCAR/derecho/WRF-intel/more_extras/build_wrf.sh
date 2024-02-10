@@ -53,6 +53,16 @@ env | sort > build-env-wrf.log
 1
 EOF
 
+# WRFv3 requires linking with the XDR API, on OpenSUSE that's -ltirpc
+case "${WRF_VERSION}" in
+    3.*)
+        echo "appending -ltirpc to libs..."
+        sed -i 's/-lnetcdff -lnetcdf/-lnetcdff -lnetcdf -ltirpc/g' configure.wrf
+        ;;
+    *)
+        ;;
+esac
+
 # replace bad optimization architecture flags
 # (ref: https://ncar-hpc-docs.readthedocs.io/en/latest/compute-systems/derecho/compiling-code-on-derecho/#optimizing-your-code-with-intel-compilers)
 sed -i 's/ -xHost/ -march=core-avx2/g' configure.wrf
@@ -63,7 +73,6 @@ sed -i 's/-O3/-O3 -march=core-avx2/g' configure.wrf
 sed -i 's/-O2/-O2 -march=core-avx2/g' configure.wrf
 
 ./compile em_real 2>&1 | tee compile-wrf-out.log
-#./compile em_real > compile-wrf-out.log 2>&1 || { cat compile-wrf-out.log; exit 1; }
 
 set -x
 for file in main/*.exe *.log configure.wrf; do
