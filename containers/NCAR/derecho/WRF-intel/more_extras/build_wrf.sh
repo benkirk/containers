@@ -58,6 +58,9 @@ case "${WRF_VERSION}" in
     3.*)
         echo "appending -ltirpc to libs..."
         sed -i 's/-lnetcdff -lnetcdf/-lnetcdff -lnetcdf -ltirpc/g' configure.wrf
+
+        echo "fix ifort: command line error: option -openmp is not supported. Please use the replacement option -qopenmp"
+        sed -i 's/-openmp/-qopenmp/g' configure.wrf
         ;;
     *)
         ;;
