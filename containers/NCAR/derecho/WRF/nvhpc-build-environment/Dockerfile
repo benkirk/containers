@@ -1,32 +1,7 @@
-FROM benjaminkirk/ncar-derecho-site_customizations:latest
+ARG ARCH=amd64
+FROM --platform=linux/${ARCH} benjaminkirk/ncar-derecho-wrf-base:latest
 
-RUN echo "zypper install of additional WRF build dependencies" \
-    && set -x \
-    && zypper -n install \
-              emacs-nox \
-              tcsh time file hostname perl \
-              flex byacc \
-              zlib zlib-devel \
-              jasper libjasper-devel \
-              file flex \
-              libtirpc-devel \
-              libpng16-devel \
-              rsync \
-    && zypper -n install \
-              libtool automake autoconf \
-    && docker-clean
-
-RUN mkdir -p /container && cd /container \
-    && echo "# sourceme to get custom build environment" > config_env.sh \
-    && for comp in gcc g++ gfortran; do ${comp} --version ; done \
-    && docker-clean
-
-ENV MPICH_VERSION=3.4.3
-ENV HDF5_VERSION=1.10.11
-ENV NETCDF_C_VERSION=4.9.2
-ENV NETCDF_FORTRAN_VERSION=4.6.1
 ENV NVHPC_VERSION=23.9
-
 RUN cd /tmp \
     && echo "Downloading NVHPC v${NVHPC_VERSION}" \
     && curl -sSL https://developer.download.nvidia.com/hpc-sdk/23.9/nvhpc_2023_239_Linux_x86_64_cuda_12.2.tar.gz | tar zx \
@@ -49,6 +24,13 @@ RUN cd /tmp \
     && rm -rf ${rm_paths} \
     && docker-clean
 
+ENV MPICH_VERSION=3.4.3
+ENV HDF5_VERSION=1.10.11
+ENV NETCDF_C_VERSION=4.9.2
+ENV NETCDF_FORTRAN_VERSION=4.6.1
+
+# install desired HDF5 & NETCDF libraries.  we put these into the library search path via
+# ldconfig so that they can be found within the final contaner image irrespective of LD_LIBRARY_PATH
 RUN mkdir -p /container/hdf5/BUILD_DIR \
     && source /container/config_env.sh \
     && cd /container/hdf5/BUILD_DIR \
@@ -63,10 +45,10 @@ RUN mkdir -p /container/hdf5/BUILD_DIR \
            --enable-fortran \
            --disable-parallel \
            --with-szlib=no \
+           --disable-dependency-tracking \
     && make -j 4 && make install \
     && echo -e "\n# HDF5 libraries" >> /container/config_env.sh \
     && echo "PATH=/container/hdf5/bin:\${PATH}" >> /container/config_env.sh \
-    && echo "LD_LIBRARY_PATH=/container/hdf5/lib:\${LD_LIBRARY_PATH}" >> /container/config_env.sh \
     && echo "/container/hdf5/lib" >> /etc/ld.so.conf.d/hdf5.conf \
     && ldconfig --verbose \
     && rm -rf /container/hdf5/BUILD_DIR \
@@ -87,10 +69,13 @@ RUN mkdir -p /container/netcdf/BUILD_DIR \
            --disable-libxml2 \
            --disable-dap \
            --disable-byterange \
+           --disable-dependency-tracking \
     && make -j 4 && make install \
+    && echo -e "\n# NETCDF libraries" >> /container/config_env.sh && echo "PATH=/container/netcdf/bin:\${PATH}" >> /container/config_env.sh \
+    && echo "/container/netcdf/lib" >> /etc/ld.so.conf.d/netcdf.conf \
+    && ldconfig --verbose \
     && cd /container/netcdf/BUILD_DIR \
     && cd netcdf-fortran-${NETCDF_FORTRAN_VERSION}/ \
-    && export LD_LIBRARY_PATH=/container/netcdf/lib:${LD_LIBRARY_PATH} \
     && ./configure \
            CXX=$(which g++) CC=$(which gcc) FC=$(which nvfortran) F77=$(which nvfortran) \
            CXXFLAGS="-fPIC" CFLAGS="-fPIC" FFLAGS="-fPIC" FCFLAGS="-fPIC" \
@@ -98,14 +83,16 @@ RUN mkdir -p /container/netcdf/BUILD_DIR \
            LDFLAGS="-L/container/netcdf/lib -L/container/hdf5/lib" \
            --prefix=/container/netcdf \
            --disable-dap \
+           --disable-dependency-tracking \
     && make -j 4 && make install \
-    && echo -e "\n# NETCDF libraries" >> /container/config_env.sh && echo "PATH=/container/netcdf/bin:\${PATH}" >> /container/config_env.sh \
-    && echo "LD_LIBRARY_PATH=/container/netcdf/lib:\${LD_LIBRARY_PATH}" >> /container/config_env.sh \
-    && echo "/container/netcdf/lib" >> /etc/ld.so.conf.d/netcdf.conf \
     && ldconfig --verbose \
     && rm -rf /container/netcdf/BUILD_DIR \
     && docker-clean
 
+# install desired MPI library. we DO NOT put this into the library search path,
+# because later we will override this MPI at runtime via host MPI injection and
+# associated LD_LIBRARY_PATH manipulations
+#
 # mpich-3.4.3 and nvfortran misunderstand each other regarding real*16, avoid false positive.
 # so we take the rather drastic step of modyfying configure.ac to prevent building the f08 interface,
 # no matter what configure *thinks* it finds...
@@ -122,7 +109,8 @@ RUN mkdir -p /container/mpich/BUILD_DIR \
            --prefix=/container/mpich \
            --with-wrapper-dl-type=none \
            --with-device=ch4:ofi \
-           --enable-fortran --disable-cxx | tee /container/mpich/configure-out.log \
+           --disable-dependency-tracking \
+           --enable-fortran | tee /container/mpich/configure-out.log \
     && make -j 8 install \
     && echo -e "\n# MPICH v${MPICH_VERSION} paths" >> /container/config_env.sh \
     && echo "export PATH=/container/mpich/bin:\${PATH}" >> /container/config_env.sh \
@@ -130,26 +118,20 @@ RUN mkdir -p /container/mpich/BUILD_DIR \
     && rm -rf /container/mpich/BUILD_DIR/ \
     && docker-clean
 
-# # restore if we enable-cxx in MPICH
-# RUN whoami \
-#     && sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /container/mpich/bin/mpicxx
-
-RUN cd /etc/profile.d/ \
-    && ln -s /container/config_env.sh ./z00-build-env.sh \
-    && docker-clean
-
-# archive this Dockerfile in the image
-ADD extras/Dockerfile.* /container/
+# We can't get mpicxx without -lmpicxx for mpich-v3.x, yet the -lmpicxx bindings are worthless
+# and do not exist on our Cray-EX cray-mpich.  So at minimum, prefent them from being linked,
+# since we would not then be able to override them. (sigh...)
+RUN sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /container/mpich/bin/mpicxx
 
 # environment variables useful for WRF build
-ENV JASPERINC /usr/include
-ENV JASPERLIB /usr/lib64
 ENV HDF5 /container/hdf5
 ENV NETCDF /container/netcdf
 
-ENV FLEX_LIB_DIR "/usr/lib64"
-ENV YACC "/usr/bin/byacc -d"
-ENV LIB_LOCAL "-lnetcdf -lnetcdff"
+# Ok, all done - let's indicate the environment
+RUN echo -e "\nPS1=\"WRF-nvhpc-dev> \"" >> /container/config_env.sh
+
+# archive this Dockerfile in the image
+ADD extras/Dockerfile.* /container/
 
 # Local Variables:
 # mode: sh
