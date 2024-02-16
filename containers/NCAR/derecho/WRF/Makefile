@@ -12,6 +12,8 @@ image tag:
 	for env in $(envs); do \
 	  make -C $${env} $@; \
 	done
+
+# don't push base
 push:
 	@echo "Pushing $@ in envs: $(envs)"
 	for env in $(envs); do \
