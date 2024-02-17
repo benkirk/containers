@@ -63,7 +63,7 @@ case "${WRF_VERSION}" in
         ;;
 esac
 
-./compile em_real 2>&1 | tee compile-wrf-out.log
+./compile -j 1 em_real 2>&1 | tee compile-wrf-out.log
 
 set -x
 for file in main/*.exe *.log configure.wrf; do
