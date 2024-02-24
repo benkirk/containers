@@ -1,4 +1,4 @@
-FROM docker.io/rockylinux/rockylinux:8
+FROM docker.io/rockylinux/rockylinux:9
 # (deprecated): MAINTAINER Ben Kirk <benjamin.s.kirk@gmail.com>
 
 ########################################
@@ -11,7 +11,7 @@ RUN echo "setup, yum/dnf updates " \
     && adduser plainuser && mkdir /pv && chown plainuser: /pv \
     && yum -y install dnf-plugins-core \
     && dnf -y update \
-    && dnf -y install \
+    && dnf -y install --allowerasing \
            epel-release \
            gcc gcc-c++ gcc-gfortran libstdc++-devel \
            emacs-nox make procps-ng \
