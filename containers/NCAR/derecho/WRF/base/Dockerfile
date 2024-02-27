@@ -23,7 +23,7 @@ RUN  echo "zypper install of additional WRF build dependencies" \
               tcsh time file hostname perl \
               flex byacc \
               zlib zlib-devel \
-              jasper libjasper-devel \
+              hdf5 hdf5-devel \
               file flex \
               libtirpc-devel \
               libpng16-devel \
@@ -46,7 +46,7 @@ RUN echo "Hacking OS layout to comply with WRF/WPS expectations..." \
     && cd /usr/lib64/    && ln -s libpng{16,}.so \
     && cd /usr/lib64/    && ln -s libfl.{so,a}
 
-RUN echo "OS jasper too old for WPSV3, so..." \
+RUN echo "OS/zypper jasper too old for WPSV3, so..." \
     && cd /tmp && wget -q https://sourceforge.net/projects/jpeg/files/jasper/jasper-1.900.1/jasper-1.900.1.zip/download \
     && unzip download && cd jasper-1.900.1 \
     && ./configure \
@@ -56,8 +56,8 @@ RUN echo "OS jasper too old for WPSV3, so..." \
     && docker-clean
 
 # environment variables useful for WRF build
-ENV JASPERINC /usr/include
-ENV JASPERLIB /usr/lib64
+ENV JASPERINC /container/jasper/1.900.1/include
+ENV JASPERLIB /container/jasper/1.900.1/lib
 ENV FLEX_LIB_DIR "/usr/lib64"
 ENV YACC "/usr/bin/byacc -d"
 

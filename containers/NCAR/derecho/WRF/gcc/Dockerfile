@@ -40,8 +40,6 @@ RUN echo "building WRFV3" \
 RUN echo "building WRFV3-Chem & WPSV3" \
     && export WRF_VERSION=${WRF3_VERSION} \
     && export WPS_VERSION=${WPS3_VERSION} \
-    && export JASPERINC=/container/jasper/1.900.1/include \
-    && export JASPERLIB=/container/jasper/1.900.1/lib \
     && cd /container/WRFV3 && ./build_wrf_chem.sh \
     && cd /container/WPSV3 && ./build_wps.sh \
     && cd /container/WRFV3 && git clean -xdf . >/dev/null 2>&1 \

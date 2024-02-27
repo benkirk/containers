@@ -2,33 +2,33 @@ ARG ARCH=amd64
 FROM --platform=linux/${ARCH} benjaminkirk/ncar-derecho-wrf-base:latest
 
 ENV MPICH_VERSION=3.4.3
-ENV HDF5_VERSION=1.10.11
+#ENV HDF5_VERSION=1.10.11
 ENV NETCDF_C_VERSION=4.9.2
 ENV NETCDF_FORTRAN_VERSION=4.6.1
 
 # install desired HDF5 & NETCDF libraries.  we put these into the library search path via
 # ldconfig so that they can be found within the final contaner image irrespective of LD_LIBRARY_PATH
-RUN mkdir -p /container/hdf5/BUILD_DIR \
-    && source /container/config_env.sh \
-    && cd /container/hdf5/BUILD_DIR \
-    && curl -sSL https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${HDF5_VERSION%.*}/hdf5-${HDF5_VERSION}/src/hdf5-${HDF5_VERSION}.tar.gz | tar zx \
-    && cd hdf5-${HDF5_VERSION} \
-    && ./configure \
-           CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
-           --prefix=/container/hdf5 \
-           --enable-hl \
-           --disable-cxx \
-           --enable-fortran \
-           --disable-parallel \
-           --with-szlib=no \
-           --disable-dependency-tracking \
-    && make -j 4 && make install \
-    && echo -e "\n# HDF5 libraries" >> /container/config_env.sh \
-    && echo "PATH=/container/hdf5/bin:\${PATH}" >> /container/config_env.sh \
-    && echo "/container/hdf5/lib" >> /etc/ld.so.conf.d/hdf5.conf \
-    && ldconfig --verbose \
-    && rm -rf /container/hdf5/BUILD_DIR \
-    && docker-clean
+# RUN mkdir -p /container/hdf5/BUILD_DIR \
+#     && source /container/config_env.sh \
+#     && cd /container/hdf5/BUILD_DIR \
+#     && curl -sSL https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${HDF5_VERSION%.*}/hdf5-${HDF5_VERSION}/src/hdf5-${HDF5_VERSION}.tar.gz | tar zx \
+#     && cd hdf5-${HDF5_VERSION} \
+#     && ./configure \
+#            CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
+#            --prefix=/container/hdf5 \
+#            --enable-hl \
+#            --disable-cxx \
+#            --enable-fortran \
+#            --disable-parallel \
+#            --with-szlib=no \
+#            --disable-dependency-tracking \
+#     && make -j 4 && make install \
+#     && echo -e "\n# HDF5 libraries" >> /container/config_env.sh \
+#     && echo "PATH=/container/hdf5/bin:\${PATH}" >> /container/config_env.sh \
+#     && echo "/container/hdf5/lib" >> /etc/ld.so.conf.d/hdf5.conf \
+#     && ldconfig --verbose \
+#     && rm -rf /container/hdf5/BUILD_DIR \
+#     && docker-clean
 
 RUN mkdir -p /container/netcdf/BUILD_DIR \
     && source /container/config_env.sh \
@@ -38,8 +38,6 @@ RUN mkdir -p /container/netcdf/BUILD_DIR \
     && cd netcdf-c-${NETCDF_C_VERSION} \
     && ./configure \
            CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
-           CPPFLAGS="-I/container/hdf5/include" \
-           LDFLAGS="-L/container/hdf5/lib" \
            --prefix=/container/netcdf \
            --disable-libxml2 \
            --disable-dap \
@@ -53,8 +51,8 @@ RUN mkdir -p /container/netcdf/BUILD_DIR \
     && cd netcdf-fortran-${NETCDF_FORTRAN_VERSION}/ \
     && ./configure \
            CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
-           CPPFLAGS="-I/container/netcdf/include -I/container/hdf5/include" \
-           LDFLAGS="-L/container/netcdf/lib -L/container/hdf5/lib" \
+           CPPFLAGS="-I/container/netcdf/include" \
+           LDFLAGS="-L/container/netcdf/lib" \
            --prefix=/container/netcdf \
            --disable-dap \
            --disable-dependency-tracking \
@@ -90,7 +88,6 @@ RUN mkdir -p /container/mpich/BUILD_DIR \
 RUN sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /container/mpich/bin/mpicxx
 
 # environment variables useful for WRF build
-ENV HDF5 /container/hdf5
 ENV NETCDF /container/netcdf
 
 # Ok, all done - let's indicate the environment
