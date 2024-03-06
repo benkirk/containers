@@ -16,7 +16,7 @@ RUN echo "basic zypper setup" \
     && zypper --non-interactive update \
     && zypper --non-interactive install \
               emacs-nox \
-              curl which \
+              curl which awk \
               gcc gcc-c++ gcc-fortran gmake git \
     && echo "Additional development environment setup - required to use spack" \
     && zypper --non-interactive install \
