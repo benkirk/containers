@@ -60,11 +60,11 @@ env | sort > build-env-wps.log
 #   39.  Cray XC CLE/Linux x86_64, Intel compiler   (dmpar)
 #   40.  Cray XC CLE/Linux x86_64, Intel compiler   (dmpar_NO_GRIB2)
 
-./configure <<EOF 2>&1 | tee configure-wps-out.log
+./configure <<EOF 2>&1 |& tee configure-wps-out.log
 5
 EOF
 
-./compile 2>&1 | tee compile-wps.log
+./compile 2>&1 |& tee compile-wps.log
 #./compile > compile-wps-out.log 2>&1 || { cat compile-wps-out.log; exit 1; }
 
 set -x

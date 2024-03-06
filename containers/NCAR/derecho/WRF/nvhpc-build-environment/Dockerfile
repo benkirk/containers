@@ -108,7 +108,7 @@ RUN mkdir -p /container/mpich/BUILD_DIR \
            --with-wrapper-dl-type=none \
            --with-device=ch4:ofi \
            --disable-dependency-tracking \
-           --enable-fortran | tee /container/mpich/configure-out.log \
+           --enable-fortran |& tee /container/mpich/configure-out.log \
     && make -j 8 install \
     && echo -e "\n# MPICH v${MPICH_VERSION} paths" >> /container/config_env.sh \
     && echo "export PATH=/container/mpich/bin:\${PATH}" >> /container/config_env.sh \

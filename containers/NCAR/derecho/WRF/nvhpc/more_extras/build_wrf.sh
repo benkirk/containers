@@ -48,7 +48,7 @@ env | sort > build-env-wrf.log
 #  80. (serial)  81. (smpar)  82. (dmpar)  83. (dm+sm)   FUJITSU (frtpx/fccpx): FX10/FX100 SPARC64 IXfx/Xlfx
 
 
-./configure <<EOF 2>&1 | tee configure-wrf-out.log
+./configure <<EOF 2>&1 |& tee configure-wrf-out.log
 4
 1
 EOF
@@ -67,7 +67,7 @@ esac
 sed -i 's/FCOPTIM         =       -O3/FCOPTIM         =       -O3 -tp=znver3/g' configure.wrf
 sed -i 's/FCOPTIM         =       -O2/FCOPTIM         =       -O2 -tp=znver3/g' configure.wrf
 
-./compile em_real 2>&1 | tee compile-wrf-out.log
+./compile em_real 2>&1 |& tee compile-wrf-out.log
 #./compile em_real > compile-wrf-out.log 2>&1 || { cat compile-wrf-out.log; exit 1; }
 
 set -x

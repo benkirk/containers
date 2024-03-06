@@ -52,7 +52,7 @@ env | sort > build-env-wrfchem.log
 #  80. (serial)  81. (smpar)  82. (dmpar)  83. (dm+sm)   FUJITSU (frtpx/fccpx): FX10/FX100 SPARC64 IXfx/Xlfx
 
 
-./configure <<EOF 2>&1 | tee configure-wrfchem-out.log
+./configure <<EOF 2>&1 |& tee configure-wrfchem-out.log
 34
 1
 EOF
@@ -67,7 +67,7 @@ case "${WRF_VERSION}" in
         ;;
 esac
 
-./compile -j 1 em_real 2>&1 | tee compile-wrfchem-out.log
+./compile -j 1 em_real 2>&1 |& tee compile-wrfchem-out.log
 
 set -x
 for file in main/*.exe *.log configure.wrf; do
