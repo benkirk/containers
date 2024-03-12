@@ -14,12 +14,15 @@ RUN echo "setup, yum/dnf updates " \
     && dnf -y install \
            epel-release \
            gcc gcc-c++ gcc-gfortran libstdc++-devel \
+           glibc-devel.i686 libstdc++-devel.i686 \
            emacs-nox make procps-ng \
            tar xz bzip2 gzip unzip \
            which patch file time \
            python3 \
            git curl rsync \
            findutils diffutils \
+    && dnf -y --enablerepo=powertools install \
+           libstdc++-static libstdc++-static.i686 \
     && docker-clean
 
 # Notes on above:
