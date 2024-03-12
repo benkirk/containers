@@ -6,14 +6,17 @@ label      ?= $(shell echo $(subst /,-,$(subst $(top_dir)/containers/,,$(this_di
 git_commit := $(shell git log --max-count=1 --oneline --abbrev=7 $(this_dir) 2>/dev/null | cut -d' ' -f1)
 version    ?= $(shell cat ./Version 2>/dev/null || echo "devel"-$(git_commit))
 datestamp  := $(shell date +%y.%m)
-dockerprog    ?= $(shell which docker 2>/dev/null || which podman 2>/dev/null || echo "notfound")
+#dockerprog    ?= $(shell which docker 2>/dev/null || which podman 2>/dev/null || echo "notfound")
+dockerprog    ?= $(shell which docker 2>/dev/null || echo "notfound - is docker in your path??")
 dockerhubroot ?= benjaminkirk
 
 image_tag ?= $(dockerhubroot)/$(label):$(version)
 
 DOCKER_BUILD_ARGS ?= --progress=plain
-#DOCKER_RUN_ARGS ?= ""
-DOCKER_RUN_CMD ?= /bin/bash -l
+DOCKER_BUILD_ARCH ?= --platform linux/amd64
+DOCKER_RUN_ARCH   ?= $(DOCKER_BUILD_ARCH)
+DOCKER_EXEC_ARCH  ?= $(DOCKER_RUN_ARCH)
+DOCKER_RUN_CMD    ?= /bin/bash -l
 
 echo:
 	@printf "# %s\n" "-------------------------------------------------------------"
@@ -35,7 +38,7 @@ echo_tag:
 image: .buildstamp
 
 .buildstamp: Makefile Dockerfile extras
-	$(dockerprog) build $(DOCKER_BUILD_ARGS) --build-arg DOCKERHUB_ROOT=$(dockerhubroot) --tag $(image_tag) .
+	$(dockerprog) buildx build $(DOCKER_BUILD_ARGS) $(DOCKER_BUILD_ARCH) --build-arg DOCKERHUB_ROOT=$(dockerhubroot) --tag $(image_tag) .
 	$(dockerprog) tag  $(dockerhubroot)/$(label):$(version) $(dockerhubroot)/$(label):$(datestamp)
 	$(dockerprog) tag  $(dockerhubroot)/$(label):$(version) $(dockerhubroot)/$(label):latest
 	date > $@
@@ -56,11 +59,11 @@ extras: $(top_dir)/extras Makefile Dockerfile
 
 run:
 	@if [ -d ./shared_volume/ ]; then DOCKER_SHARED_VOLUME_ARGS="--volume $(this_dir)/shared_volume:/sv"; fi; \
-	$(dockerprog) run $(DOCKER_RUN_ARGS) $${DOCKER_SHARED_VOLUME_ARGS} --rm -it $(image_tag) $(DOCKER_RUN_CMD)
+	$(dockerprog) run $(DOCKER_RUN_ARGS) $(DOCKER_RUN_ARCH) $${DOCKER_SHARED_VOLUME_ARGS} --rm -it $(image_tag) $(DOCKER_RUN_CMD)
 
 exec:
 	@container_id=$$($(dockerprog) container list | grep "$(image_tag)" | cut -d' ' -f1); \
-	$(dockerprog) exec $(DOCKER_EXEC_ARGS) -it $${container_id} $(DOCKER_RUN_CMD)
+	$(dockerprog) exec $(DOCKER_EXEC_ARGS) $(DOCKER_EXEC_ARCH) -it $${container_id} $(DOCKER_RUN_CMD)
 
 push: image
 	$(dockerprog) push $(dockerhubroot)/$(label):$(version)
