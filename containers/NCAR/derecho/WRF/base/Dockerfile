@@ -1,4 +1,3 @@
-#FROM benjaminkirk/ncar-derecho-site_customizations:latest
 ARG ARCH=amd64
 FROM --platform=linux/${ARCH} docker.io/opensuse/leap
 
@@ -46,7 +45,7 @@ RUN echo "Hacking OS layout to comply with WRF/WPS expectations..." \
     && cd /usr/lib64/    && ln -s libpng{16,}.so \
     && cd /usr/lib64/    && ln -s libfl.{so,a}
 
-RUN echo "OS/zypper jasper too old for WPSV3, so..." \
+RUN echo "OS/zypper jasper too new for WPSV3, so..." \
     && cd /tmp && wget -q https://sourceforge.net/projects/jpeg/files/jasper/jasper-1.900.1/jasper-1.900.1.zip/download \
     && unzip download && cd jasper-1.900.1 \
     && ./configure \

@@ -29,37 +29,11 @@ RUN echo "/container/intel/compiler/2022.2.1/linux/lib"     >> /etc/ld.so.conf.d
     && echo "-diag-disable=10441" >> /container/intel/compiler/2022.2.1/linux/bin/intel64/ifort.cfg
 
 ENV MPICH_VERSION=3.4.3
-#ENV HDF5_VERSION=1.10.11
 ENV NETCDF_C_VERSION=4.9.2
 ENV NETCDF_FORTRAN_VERSION=4.6.1
 
-# install desired HDF5 & NETCDF libraries.  we put these into the library search path via
+# install desired NETCDF libraries.  we put these into the library search path via
 # ldconfig so that they can be found within the final contaner image irrespective of LD_LIBRARY_PATH
-# RUN mkdir -p /container/hdf5/BUILD_DIR \
-#     && source /container/config_env.sh \
-#     && cd /container/hdf5/BUILD_DIR \
-#     && curl -sSL https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${HDF5_VERSION%.*}/hdf5-${HDF5_VERSION}/src/hdf5-${HDF5_VERSION}.tar.gz | tar zx \
-#     && cd hdf5-${HDF5_VERSION} \
-#     && ./configure \
-#            CXX=$(which icpc) CC=$(which icc) FC=$(which ifort) F77=$(which ifort) \
-#            --prefix=/container/hdf5 \
-#            --enable-hl \
-#            --disable-cxx \
-#            --enable-fortran \
-#            --disable-parallel \
-#            --with-szlib=no \
-#            --disable-dependency-tracking \
-#     && make -j 4 && make install \
-#     && echo -e "\n# HDF5 libraries" >> /container/config_env.sh \
-#     && echo "PATH=/container/hdf5/bin:\${PATH}" >> /container/config_env.sh \
-#     && echo "/container/hdf5/lib" >> /etc/ld.so.conf.d/hdf5.conf \
-#     && ldconfig --verbose \
-#     && rm -rf /container/hdf5/BUILD_DIR \
-#     && docker-clean
-
-# install desired MPI library. we DO NOT put this into the library search path,
-# because later we will override this MPI at runtime via host MPI injection and
-# associated LD_LIBRARY_PATH manipulations
 RUN mkdir -p /container/netcdf/BUILD_DIR \
     && source /container/config_env.sh \
     && cd /container/netcdf/BUILD_DIR \
@@ -92,6 +66,9 @@ RUN mkdir -p /container/netcdf/BUILD_DIR \
     && rm -rf /container/netcdf/BUILD_DIR \
     && docker-clean
 
+# install desired MPI library. we DO NOT put this into the library search path,
+# because later we will override this MPI at runtime via host MPI injection and
+# associated LD_LIBRARY_PATH manipulations
 RUN mkdir -p /container/mpich/BUILD_DIR \
     && cd /container/mpich/BUILD_DIR \
     && source /container/config_env.sh \
