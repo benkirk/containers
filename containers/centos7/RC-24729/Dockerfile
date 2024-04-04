@@ -20,20 +20,25 @@ RUN echo "lrose" \
     && yum install -y epel-release \
     && yum install -y \
            https://github.com/NCAR/lrose-core/releases/download/lrose-core-20230814/lrose-core-20230814-centos_7.x86_64.rpm \
-           cmake3 emacs-nox \
+           cmake3 emacs-nox man \
     && echo "/usr/local/lrose/lib" > /etc/ld.so.conf.d/lrose.conf \
     && ldconfig --verbose \
     && docker-clean
 
-ADD extras/pgi-20.4.tar.gz /tmp/pgi
-
-RUN echo "pgi" \
-     && cd /tmp/pgi/pgi-20.4/install_components \
-     && PGI_SILENT=true PGI_ACCEPT_EULA=accept PGI_INSTALL_DIR=/container/pgi PGI_INSTALL_NVIDIA=true PGI_INSTALL_JAVA=true PGI_INSTALL_MPI=false PGI_MPI_GPU_SUPPORT=true ./install \
-     && cd && rm -rf /tmp/pgi \
-     && echo "PATH=/container/pgi/linux86-64/20.4/bin:\${PATH}" > /etc/profile.d/pgi.sh \
-     && echo "LM_LICENSE_FILE=\"28518@stargate11.nwsc.ucar.edu\"" >> /etc/profile.d/pgi.sh \
-     && docker-clean
+# $ python -m http.server 8000 will start a localhost web server to make the below work...
+RUN echo "installing pgi" \
+    && cd /tmp \
+    && curl -sSL http://host.docker.internal:8000/codes/benkirk-containers/containers/centos7/RC-24729/installers/pgi/pgi-20.4.tar.gz | tar xz \
+    && ls \
+    && cd /tmp/pgi-20.4/install_components \
+    && PGI_SILENT=true PGI_ACCEPT_EULA=accept PGI_INSTALL_DIR=/container/pgi PGI_INSTALL_NVIDIA=true PGI_INSTALL_JAVA=false PGI_INSTALL_MPI=false PGI_MPI_GPU_SUPPORT=false ./install \
+    && cd && rm -rf /tmp/pgi* \
+    && rm -rf /container/pgi/linux86-64-nollvm/ \
+    && echo "PATH=/container/pgi/linux86-64/20.4/bin:\${PATH}" > /etc/profile.d/pgi.sh \
+    && echo "MANPATH=/container/pgi/linux86-64/20.4/man:\${PATH}" >> /etc/profile.d/pgi.sh \
+    && echo "LM_LICENSE_FILE=\"28518@stargate11.nwsc.ucar.edu\"" >> /etc/profile.d/pgi.sh \
+    && mv /container/pgi/license.dat{,.old} \
+    && docker-clean
 
 ENV LM_LICENSE_FILE="28518@stargate11.nwsc.ucar.edu" \
     CC=/container/pgi/linux86-64/20.4/bin/pgcc \
@@ -42,6 +47,9 @@ ENV LM_LICENSE_FILE="28518@stargate11.nwsc.ucar.edu" \
     F90=/container/pgi/linux86-64/20.4/bin/pgf90 \
     FC=/container/pgi/linux86-64/20.4/bin/pgf90 \
     SAMURAI_ROOT=/container/samurai
+
+ADD extras/hello_world.c /container/hello_world.c
+ADD extras/hello_world.cu /container/hello_world.cu
 
 RUN echo "Jians code" \
     && git clone https://github.com/mmbell/samurai ${SAMURAI_ROOT} \
