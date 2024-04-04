@@ -10,141 +10,58 @@ RUN echo "yum/dnf tweaks" \
     && mkdir /container \
     && yum update -y \
     && yum groupinstall -y "Development Tools" \
+    && yum install -y epel-release \
     && yum install -y \
            gcc gcc-c++ gcc-gfortran wget git chrpath which \
            libtool automake autoconf \
+           cmake3 emacs-nox man \
+           fftw-devel fftw \
     && docker-clean \
     && adduser plainuser && mkdir -p /container && chown plainuser: /container
 
+#  https://github.com/NCAR/lrose-core/blob/master/docs/download/download_package_and_install.redhat.md
 RUN echo "lrose" \
-    && yum install -y epel-release \
     && yum install -y \
            https://github.com/NCAR/lrose-core/releases/download/lrose-core-20230814/lrose-core-20230814-centos_7.x86_64.rpm \
-           cmake3 emacs-nox man \
     && echo "/usr/local/lrose/lib" > /etc/ld.so.conf.d/lrose.conf \
+    && echo "export LROSE_INSTALL_DIR=/usr/local/lrose" >> /container/config_env.sh \
     && ldconfig --verbose \
     && docker-clean
 
 # $ python -m http.server 8000 will start a localhost web server to make the below work...
-RUN echo "installing pgi" \
+RUN echo "installing pgi-20.4" \
     && cd /tmp \
     && curl -sSL http://host.docker.internal:8000/codes/benkirk-containers/containers/centos7/RC-24729/installers/pgi/pgi-20.4.tar.gz | tar xz \
-    && ls \
     && cd /tmp/pgi-20.4/install_components \
     && PGI_SILENT=true PGI_ACCEPT_EULA=accept PGI_INSTALL_DIR=/container/pgi PGI_INSTALL_NVIDIA=true PGI_INSTALL_JAVA=false PGI_INSTALL_MPI=false PGI_MPI_GPU_SUPPORT=false ./install \
     && cd && rm -rf /tmp/pgi* \
     && rm -rf /container/pgi/linux86-64-nollvm/ \
     && echo "PATH=/container/pgi/linux86-64/20.4/bin:\${PATH}" > /etc/profile.d/pgi.sh \
     && echo "MANPATH=/container/pgi/linux86-64/20.4/man:\${PATH}" >> /etc/profile.d/pgi.sh \
-    && echo "LM_LICENSE_FILE=\"28518@stargate11.nwsc.ucar.edu\"" >> /etc/profile.d/pgi.sh \
+    && echo "export LM_LICENSE_FILE=\"28518@stargate11.nwsc.ucar.edu\"" >> /etc/profile.d/pgi.sh \
+    && cat /etc/profile.d/pgi.sh >> /container/config_env.sh \
     && mv /container/pgi/license.dat{,.old} \
     && docker-clean
 
-ENV LM_LICENSE_FILE="28518@stargate11.nwsc.ucar.edu" \
-    CC=/container/pgi/linux86-64/20.4/bin/pgcc \
-    CXX=/container/pgi/linux86-64/20.4/bin/pgc++ \
-    F77=/container/pgi/linux86-64/20.4/bin/pgf77 \
-    F90=/container/pgi/linux86-64/20.4/bin/pgf90 \
-    FC=/container/pgi/linux86-64/20.4/bin/pgf90 \
-    SAMURAI_ROOT=/container/samurai
+
+RUN echo "export CC=/container/pgi/linux86-64/20.4/bin/pgcc" >> /container/config_env.sh \
+    echo "export CXX=/container/pgi/linux86-64/20.4/bin/pgc++" >> /container/config_env.sh \
+    echo "export F77=/container/pgi/linux86-64/20.4/bin/pgfortran" >> /container/config_env.sh \
+    echo "export F90=/container/pgi/linux86-64/20.4/bin/pgf90" >> /container/config_env.sh \
+    echo "export FC=/container/pgi/linux86-64/20.4/bin/pgf90" >> /container/config_env.sh \
+    echo "export SAMURAI_ROOT=/container/samurai" >> /container/config_env.sh
 
 ADD extras/hello_world.c /container/hello_world.c
 ADD extras/hello_world.cu /container/hello_world.cu
 
 RUN echo "Jians code" \
+    && source /container/config_env.sh \
     && git clone https://github.com/mmbell/samurai ${SAMURAI_ROOT} \
     && cd ${SAMURAI_ROOT} \
     && docker-clean
 
-# RUN echo "lrose" \
-#     && mkdir -p /tmp/lrose \
-#     && git clone https://github.com/ncar/lrose-bootstrap.git /tmp/lrose/bootstrap \
-#     && cd /tmp/lrose/bootstrap/scripts \
-#     && ls \
-#     && ./run_install_linux_packages \
-#     && ./lrose_checkout_and_build_cmake.py \
-#            --verbose --package samurai \
-#            --prefix=/container/lrose \
-#     && docker-clean
-
-# RUN echo "lrose" \
-#     && mkdir -p /tmp/lrose \
-#     && git clone https://github.com/ncar/lrose-bootstrap.git /tmp/lrose/bootstrap \
-#     && cd /tmp/lrose/bootstrap/scripts \
-#     && ls \
-#     && ./do_build_all_cmake.py \
-#            --verbose \
-#            --prefix /containerlrose \
-#            --buildDir /tmp/lrose-build \
-#            --logDir /tmp/build-logs \
-#            --cmake3 \
-#            --samurai \
-#     && docker-clean
-
-
-# ADD extras/mpi-pi.c /container/pi.c
-# ADD extras/hello_world_mpi.C /container/hello_world_mpi.C
-#
-# RUN whoami && cd /container \
-#     && wget -q http://www.mpich.org/static/downloads/3.4.3/mpich-3.4.3.tar.gz \
-#     && mkdir mpich-3.4.3 && cd mpich-3.4.3 && tar xf ../mpich-3.4.3.tar.gz  && rm -f ../mpich-3.4.3.tar.gz \
-#     && mv mpich-3.4.3 /container/mpich-3.4.3/src/ && cd /container/mpich-3.4.3/src/ \
-#     && ./configure \
-#            --prefix=/container/mpich-3.4.3/install \
-#            --with-wrapper-dl-type=none \
-#            --with-device=ch4:ofi \
-#            --enable-fortran \
-#            CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
-#     && make -j 8 install && cd /container/ && rm -rf /container/mpich-3.4.3/src/ \
-#     && echo "export PATH=$PATH:/container/mpich-3.4.3/install/bin" > config_env.sh \
-#     && echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/container/mpich-3.4.3/install/lib" >> config_env.sh \
-#     && docker-clean
-#
-# # Prevent mpicxx from linking -lmpicxx, which we do not need, and cannot use on our Cray-EX
-# RUN whoami && cd /container \
-#     && sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /container/mpich-3.4.3/install/bin/mpicxx
-#
-#
-# RUN whoami && cd /container \
-#     && . /container/config_env.sh \
-#     && mpicc -o pi -fPIC pi.c -lm \
-#     && mpiexec -n 6 ./pi \
-#     && mpicxx -o hello_world_mpi -fPIC hello_world_mpi.C -fopenmp \
-#     && ldd ./hello_world_mpi \
-#     && OMP_NUM_THREADS=4 mpiexec -n 6 ./hello_world_mpi  \
-#     && docker-clean
-#
-# RUN whoami \
-#     && . /container/config_env.sh \
-#     && cd /tmp && curl -SL https://mvapich.cse.ohio-state.edu/download/mvapich/osu-micro-benchmarks-7.0.1.tar.gz | tar zx && cd osu-micro-benchmarks-7.0.1 \
-#     && ./configure --prefix=/container/osu-micro-benchmarks-7.0.1 \
-#                    CXX=`which mpicxx` CC=`which mpicc` FC=`which mpif90` F77=`which mpif77` \
-#     && make -j V=0 && make install \
-#     && cd && rm -rf /tmp/osu-micro-benchmarks-7.0.1 \
-#     && cd /container && mpicxx -o hello_world_mpi /container/hello_world_mpi.C -fopenmp \
-#     && ldd hello_world_mpi \
-#     && cp hello_world_mpi hw && chrpath --delete hw \
-#     && docker-clean
-#
-# RUN whoami && cd /container \
-#     && . /container/config_env.sh \
-#     && mpicxx -o hello_world_mpi -fPIC hello_world_mpi.C -fopenmp \
-#     && OMP_NUM_THREADS=4 mpiexec -n 6 ./hello_world_mpi \
-#     && cd /container && git clone https://github.com/intel/mpi-benchmarks.git imb-2021.3 \
-#     && cd /container/imb-2021.3 && git checkout 8ba5d968272b6e7b384f91b6597d1c4590faf3db \
-#     && CXX=`which mpicxx` CC=`which mpicc` make \
-#     && make -C src_cpp -f Makefile TARGET=MPI1 clean \
-#     && make -C src_cpp -f Makefile TARGET=NBC clean\
-#     && make -C src_cpp -f Makefile TARGET=RMA clean \
-#     && make -C src_cpp -f Makefile TARGET=EXT clean \
-#     && make -C src_cpp -f Makefile TARGET=IO clean \
-#     && make -C src_cpp -f Makefile TARGET=MT clean \
-#     && make -C src_c/P2P -f Makefile TARGET=P2P clean \
-#     && make -C src_cpp -f Makefile TARGET=MPI1 clean GPU_ENABLE=1 \
-#     && ldd IMB-MPI1 \
-#     && docker-clean
-#
-# CMD /container/pi
+# Ok, all done - let's indicate the environment
+RUN echo -e "\nPS1=\"PGI-20.4-dev> \"" >> /container/config_env.sh
 
 # Local Variables:
 # mode: sh
