@@ -16,6 +16,10 @@ RUN echo "yum/dnf tweaks" \
            libtool automake autoconf \
            cmake3 emacs-nox man \
            fftw-devel fftw \
+           netcdf netcdf-devel \
+           netcdf-fortran netcdf-fortran-devel \
+           netcdf-cxx netcdf-cxx-devel \
+           hdf5 hdf5-devel \
     && docker-clean \
     && adduser plainuser && mkdir -p /container && chown plainuser: /container
 
@@ -36,11 +40,11 @@ RUN echo "installing pgi-20.4" \
     && PGI_SILENT=true PGI_ACCEPT_EULA=accept PGI_INSTALL_DIR=/container/pgi PGI_INSTALL_NVIDIA=true PGI_INSTALL_JAVA=false PGI_INSTALL_MPI=false PGI_MPI_GPU_SUPPORT=false ./install \
     && cd && rm -rf /tmp/pgi* \
     && rm -rf /container/pgi/linux86-64-nollvm/ \
-    && echo "PATH=/container/pgi/linux86-64/20.4/bin:\${PATH}" > /etc/profile.d/pgi.sh \
-    && echo "MANPATH=/container/pgi/linux86-64/20.4/man:\${PATH}" >> /etc/profile.d/pgi.sh \
-    && echo "export LM_LICENSE_FILE=\"28518@stargate11.nwsc.ucar.edu\"" >> /etc/profile.d/pgi.sh \
-    && cat /etc/profile.d/pgi.sh >> /container/config_env.sh \
+    && echo "PATH=/container/pgi/linux86-64/20.4/bin:\${PATH}" >> /container/config_env.sh \
+    && echo "MANPATH=/container/pgi/linux86-64/20.4/man:\${PATH}" >> /container/config_env.sh \
+    && echo "export LM_LICENSE_FILE=\"28518@stargate11.nwsc.ucar.edu\"" >> /container/config_env.sh \
     && mv /container/pgi/license.dat{,.old} \
+    && ln -s /container/config_env.sh /etc/profile.d/container_env.sh \
     && docker-clean
 
 
@@ -53,12 +57,12 @@ RUN echo "export CC=/container/pgi/linux86-64/20.4/bin/pgcc" >> /container/confi
 
 ADD extras/hello_world.c /container/hello_world.c
 ADD extras/hello_world.cu /container/hello_world.cu
+ADD extras/build_samurai.sh /container/build_samurai.sh
 
-RUN echo "Jians code" \
-    && source /container/config_env.sh \
-    && git clone https://github.com/mmbell/samurai ${SAMURAI_ROOT} \
-    && cd ${SAMURAI_ROOT} \
-    && docker-clean
+# RUN echo "Jians code" \
+#     && source /container/config_env.sh \
+#     && /container/build_samurai.sh \
+#     && docker-clean
 
 # Ok, all done - let's indicate the environment
 RUN echo -e "\nPS1=\"PGI-20.4-dev> \"" >> /container/config_env.sh
