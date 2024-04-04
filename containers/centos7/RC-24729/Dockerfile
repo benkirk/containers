@@ -15,11 +15,12 @@ RUN echo "yum/dnf tweaks" \
            gcc gcc-c++ gcc-gfortran wget git chrpath which \
            libtool automake autoconf \
            cmake3 emacs-nox man \
-           fftw-devel fftw \
-           netcdf netcdf-devel \
-           netcdf-fortran netcdf-fortran-devel \
-           netcdf-cxx netcdf-cxx-devel \
-           hdf5 hdf5-devel \
+           fftw{,-devel} \
+           netcdf{,-devel} \
+           netcdf-fortran{,-devel} \
+           netcdf-cxx{,-devel} \
+           hdf5{,-devel} \
+           bzip2{,-libs,-devel} \
     && docker-clean \
     && adduser plainuser && mkdir -p /container && chown plainuser: /container
 
