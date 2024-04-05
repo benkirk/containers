@@ -58,7 +58,7 @@ ADD extras/hello_world.cu /container/hello_world_cuda.c
 
 # LROSE option (1) - fully from RPMs
 #  https://github.com/NCAR/lrose-core/blob/master/docs/download/download_package_and_install.redhat.md
-RUN echo "lrose (rpms)" \
+RUN echo "lrose-core (rpms)" \
     && yum install -y \
            https://github.com/NCAR/lrose-core/releases/download/lrose-core-20230814/lrose-core-20230814-centos_7.x86_64.rpm \
     && echo "/usr/local/lrose/lib" > /etc/ld.so.conf.d/lrose.conf \
@@ -68,7 +68,7 @@ RUN echo "lrose (rpms)" \
 
 # LROSE option (2): install dependencies here, then
 # compile lrose later with PGI
- RUN echo "lrose (bootstrap)" \
+ RUN echo "lrose (build dependencies)" \
      && cd /tmp \
      && git clone https://github.com/ncar/lrose-bootstrap.git \
      && cd lrose-bootstrap/scripts \
