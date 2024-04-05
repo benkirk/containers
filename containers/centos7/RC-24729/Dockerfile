@@ -65,17 +65,15 @@ RUN echo "lrose (rpms)" \
     && ldconfig --verbose \
     && docker-clean
 
-
 # LROSE option (2): install dependencies here, then
 # compile lrose later with PGI
-# RUN echo "lrose (bootstrap)" \
-#     && cd /tmp \
-#     && git clone https://github.com/ncar/lrose-bootstrap.git \
-#     && cd lrose-bootstrap/scripts \
-#     && ./run_install_linux_packages \
-#     && echo "export LROSE_INSTALL_DIR=/container/lrose" >> /container/config_env.sh \
-#     && cd && rm -rf /tmp/lrose-bootstrap \
-#     && docker-clean
+ RUN echo "lrose (bootstrap)" \
+     && cd /tmp \
+     && git clone https://github.com/ncar/lrose-bootstrap.git \
+     && cd lrose-bootstrap/scripts \
+     && ./run_install_linux_packages \
+     && cd && rm -rf /tmp/lrose-bootstrap \
+     && docker-clean
 
 # ADD extras/build_samurai.sh /container/build_samurai.sh
 # RUN echo "Jians code" \
