@@ -21,24 +21,20 @@ RUN echo "yum/dnf tweaks" \
            netcdf-cxx{,-devel} \
            hdf5{,-devel} \
            bzip2{,-libs,-devel} \
+    && ln -s /usr/bin/cmake{3,} && which cmake \
     && docker-clean \
     && adduser plainuser && mkdir -p /container && chown plainuser: /container
-
-#  https://github.com/NCAR/lrose-core/blob/master/docs/download/download_package_and_install.redhat.md
-RUN echo "lrose" \
-    && yum install -y \
-           https://github.com/NCAR/lrose-core/releases/download/lrose-core-20230814/lrose-core-20230814-centos_7.x86_64.rpm \
-    && echo "/usr/local/lrose/lib" > /etc/ld.so.conf.d/lrose.conf \
-    && echo "export LROSE_INSTALL_DIR=/usr/local/lrose" >> /container/config_env.sh \
-    && ldconfig --verbose \
-    && docker-clean
 
 # $ python -m http.server 8000 will start a localhost web server to make the below work...
 RUN echo "installing pgi-20.4" \
     && cd /tmp \
     && curl -sSL http://host.docker.internal:8000/codes/benkirk-containers/containers/centos7/RC-24729/installers/pgi/pgi-20.4.tar.gz | tar xz \
     && cd /tmp/pgi-20.4/install_components \
-    && PGI_SILENT=true PGI_ACCEPT_EULA=accept PGI_INSTALL_DIR=/container/pgi PGI_INSTALL_NVIDIA=true PGI_INSTALL_JAVA=false PGI_INSTALL_MPI=false PGI_MPI_GPU_SUPPORT=false ./install \
+    && echo && \
+        PGI_SILENT=true \
+        PGI_ACCEPT_EULA=accept PGI_INSTALL_DIR=/container/pgi \
+        PGI_INSTALL_NVIDIA=true PGI_INSTALL_JAVA=false PGI_INSTALL_MPI=false PGI_MPI_GPU_SUPPORT=false \
+        ./install \
     && cd && rm -rf /tmp/pgi* \
     && rm -rf /container/pgi/linux86-64-nollvm/ \
     && echo "PATH=/container/pgi/linux86-64/20.4/bin:\${PATH}" >> /container/config_env.sh \
@@ -57,9 +53,31 @@ RUN echo "export CC=/container/pgi/linux86-64/20.4/bin/pgcc" >> /container/confi
     echo "export SAMURAI_ROOT=/container/samurai" >> /container/config_env.sh
 
 ADD extras/hello_world.c /container/hello_world.c
-ADD extras/hello_world.cu /container/hello_world.cu
-ADD extras/build_samurai.sh /container/build_samurai.sh
+ADD extras/hello_world.cu /container/hello_world_cuda.c
 
+# LROSE option (1) - fully from RPMs
+#  https://github.com/NCAR/lrose-core/blob/master/docs/download/download_package_and_install.redhat.md
+RUN echo "lrose (rpms)" \
+    && yum install -y \
+           https://github.com/NCAR/lrose-core/releases/download/lrose-core-20230814/lrose-core-20230814-centos_7.x86_64.rpm \
+    && echo "/usr/local/lrose/lib" > /etc/ld.so.conf.d/lrose.conf \
+    && echo "export LROSE_INSTALL_DIR=/usr/local/lrose" >> /container/config_env.sh \
+    && ldconfig --verbose \
+    && docker-clean
+
+
+# LROSE option (2): install dependencies here, then
+# compile lrose later with PGI
+# RUN echo "lrose (bootstrap)" \
+#     && cd /tmp \
+#     && git clone https://github.com/ncar/lrose-bootstrap.git \
+#     && cd lrose-bootstrap/scripts \
+#     && ./run_install_linux_packages \
+#     && echo "export LROSE_INSTALL_DIR=/container/lrose" >> /container/config_env.sh \
+#     && cd && rm -rf /tmp/lrose-bootstrap \
+#     && docker-clean
+
+# ADD extras/build_samurai.sh /container/build_samurai.sh
 # RUN echo "Jians code" \
 #     && source /container/config_env.sh \
 #     && /container/build_samurai.sh \
