@@ -45,12 +45,13 @@ RUN echo "installing pgi-20.4" \
     && docker-clean
 
 
-RUN echo "export CC=/container/pgi/linux86-64/20.4/bin/pgcc" >> /container/config_env.sh \
-    echo "export CXX=/container/pgi/linux86-64/20.4/bin/pgc++" >> /container/config_env.sh \
-    echo "export F77=/container/pgi/linux86-64/20.4/bin/pgfortran" >> /container/config_env.sh \
-    echo "export F90=/container/pgi/linux86-64/20.4/bin/pgf90" >> /container/config_env.sh \
-    echo "export FC=/container/pgi/linux86-64/20.4/bin/pgf90" >> /container/config_env.sh \
-    echo "export SAMURAI_ROOT=/container/samurai" >> /container/config_env.sh
+RUN echo "compilation environment" \
+    && echo "export CC=/container/pgi/linux86-64/20.4/bin/pgcc" >> /container/config_env.sh \
+    && echo "export CXX=/container/pgi/linux86-64/20.4/bin/pgc++" >> /container/config_env.sh \
+    && echo "export F77=/container/pgi/linux86-64/20.4/bin/pgfortran" >> /container/config_env.sh \
+    && echo "export F90=/container/pgi/linux86-64/20.4/bin/pgf90" >> /container/config_env.sh \
+    && echo "export FC=/container/pgi/linux86-64/20.4/bin/pgf90" >> /container/config_env.sh \
+    && echo "export SAMURAI_ROOT=/container/samurai" >> /container/config_env.sh
 
 ADD extras/hello_world.c /container/hello_world.c
 ADD extras/hello_world.cu /container/hello_world_cuda.c
