@@ -50,7 +50,9 @@ RUN echo "More extra packages" \
 
 
 # Prevent mpicxx from linking -lmpicxx, which we do not need, and cannot use on our Cray-EX
-RUN sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /opt/ohpc/pub/mpi/${MPI_FAMILY_VARIANT}-${COMPILER_VERSION}-ohpc/3.4.3/bin/mpicxx
+RUN if [ -f  /opt/ohpc/pub/mpi/${MPI_FAMILY_VARIANT}-${COMPILER_VERSION}-ohpc/3.4.3/bin/mpicxx ]; then \
+      sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /opt/ohpc/pub/mpi/${MPI_FAMILY_VARIANT}-${COMPILER_VERSION}-ohpc/3.4.3/bin/mpicxx; \
+    fi
 
 COPY extras/hello_world_mpi.C /home/plainuser/
 COPY extras/bootstrap_libmesh.sh /home/plainuser/
