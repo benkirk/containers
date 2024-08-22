@@ -1,0 +1,30 @@
+#%Module1.0#####################################################################
+
+proc ModulesHelp { } {
+
+puts stderr " "
+puts stderr "This module loads the openmpi4 library built with the gnu12 toolchain."
+puts stderr "\nVersion 4.1.6\n"
+
+}
+module-whatis "Name: openmpi4 built with gnu12 toolchain"
+module-whatis "Version: 4.1.6"
+module-whatis "Category: runtime library"
+module-whatis "Description: A powerful implementation of MPI/SHMEM"
+module-whatis "URL: http://www.open-mpi.org"
+
+set     version			    4.1.6
+
+setenv          MPI_DIR             /opt/ohpc/pub/mpi/openmpi4-gnu12-cuda/4.1.6
+setenv          OMPI_MCA_mca_base_component_show_load_errors 0
+prepend-path    PATH                /opt/ohpc/pub/mpi/openmpi4-gnu12-cuda/4.1.6/bin
+prepend-path    MANPATH             /opt/ohpc/pub/mpi/openmpi4-gnu12-cuda/4.1.6/share/man
+prepend-path	LD_LIBRARY_PATH	    /opt/ohpc/pub/mpi/openmpi4-gnu12-cuda/4.1.6/lib
+prepend-path    MODULEPATH          /opt/ohpc/pub/moduledeps/gnu12-openmpi4-cuda
+prepend-path    PKG_CONFIG_PATH     /opt/ohpc/pub/mpi/openmpi4-gnu12-cuda/4.1.6/lib/pkgconfig
+
+depends-on hwloc
+depends-on ucx
+depends-on libfabric
+depends-on cuda
+family "MPI"

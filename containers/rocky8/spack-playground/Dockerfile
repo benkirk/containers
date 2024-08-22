@@ -21,6 +21,7 @@ RUN echo "setup, yum/dnf updates " \
            python3 \
            git curl rsync \
            findutils diffutils \
+           mesa-libGL-devel mesa-libGLU-devel \
     && dnf -y --enablerepo=powertools install \
            libstdc++-static libstdc++-static.i686 \
     && docker-clean
