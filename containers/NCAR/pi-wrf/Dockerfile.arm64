@@ -69,7 +69,7 @@ RUN cd /pi-wrf/WRF_System/WRFV4.6.0/ \
 RUN cd /pi-wrf/WRF_System/WPS/ \
     && export WRF_ROOT=/pi-wrf/WRF_System/WRFV4.6.0/install \
     && export INCLUDE="/usr/include:" \
-    && sed -i 's/Linux x86_64, gfortran/ Linux x86_64 aarch64, gfortran/g' arch/configure.defaults \
+    && sed -i 's/Linux x86_64, gfortran/Linux x86_64 aarch64, gfortran/g' arch/configure.defaults \
     && ./configure_new <<< $'0\nN\nY\nY' \
     && ./compile_new -j 8 \
     && find $(pwd)/install -ls \
