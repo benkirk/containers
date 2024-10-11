@@ -20,7 +20,7 @@ RUN apt-get update --fix-missing \
 
 # Conda
 RUN mkdir -p /pi-wrf/miniconda3 \
-    && miniconda_ARCH="aarch64" \
+    && miniconda_ARCH="$(uname -m)" \
     && cd /tmp && curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-${miniconda_ARCH}.sh \
     && bash ./Miniconda3-latest-Linux-${miniconda_ARCH}.sh -b -u -p /pi-wrf/miniconda3 \
     && ln -sf /pi-wrf/miniconda3/etc/profile.d/conda.sh /pi-wrf/init-conda.sh \
@@ -59,6 +59,7 @@ RUN cd /pi-wrf/WRF_System/ && curl -sSL https://github.com/wrf-model/WRF/release
 # CONFIGURING  AND Compile WRF
 SHELL ["/bin/bash", "-c"]
 RUN cd /pi-wrf/WRF_System/WRFV4.6.0/ \
+    && env \
     && ./configure_new <<< $'0\n0\n1\n0\nY\nN\nN' \
     && ./compile_new -j 8 \
     && find $(pwd)/install -ls \
