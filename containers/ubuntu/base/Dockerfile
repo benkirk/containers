@@ -8,7 +8,8 @@ ADD extras/docker-clean /usr/bin/docker-clean
 
 RUN echo "apt update & setup" \
     && chmod a+rx /usr/bin/docker-clean \
-    && apt update \
+    && apt-get update -y \
+    && apt-get install -y adduser \
     && adduser plainuser && mkdir /opt/local && chown plainuser: /opt/local
 
 RUN echo "apt extras" \
