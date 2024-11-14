@@ -1,4 +1,4 @@
-FROM benjaminkirk/ncar-casper-site_customizations:latest
+FROM docker.io/opensuse/tumbleweed
 
 RUN echo "zypper install of additional GUI tools" \
     && set -x \
@@ -7,6 +7,7 @@ RUN echo "zypper install of additional GUI tools" \
               vlc vlc-qt vlc-vdpau \
               smplayer \
               ffmpeg \
+              haruna \
               gv eog evince evince-plugin-pdfdocument geeqie qpdfview \
               dia inkscape xfig \
               ImageMagick ImageMagick-extra \
