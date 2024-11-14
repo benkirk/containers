@@ -1,7 +1,11 @@
 FROM docker.io/opensuse/tumbleweed
 
+ADD extras/docker-clean /usr/bin/docker-clean
+
 RUN echo "zypper install of additional GUI tools" \
     && set -x \
+    && zypper --non-interactive refresh \
+    && zypper --non-interactive update \
     && zypper -n install \
               gimp iso-codes \
               vlc vlc-qt vlc-vdpau \
@@ -11,6 +15,7 @@ RUN echo "zypper install of additional GUI tools" \
               gv eog evince evince-plugin-pdfdocument geeqie qpdfview \
               dia inkscape xfig \
               ImageMagick ImageMagick-extra \
+    && chmod +x /usr/bin/docker-clean \
     && docker-clean
 
 RUN echo "zypper install of additional editors" \
