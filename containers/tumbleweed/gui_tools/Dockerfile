@@ -30,7 +30,6 @@ RUN echo "zypper install of visual diff tools" \
     && set -x \
     && zypper -n install \
               meld \
-              tkdiff \
     && docker-clean
 
 # archive this Dockerfile in the image
