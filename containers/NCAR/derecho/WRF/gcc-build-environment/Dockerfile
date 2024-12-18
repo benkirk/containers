@@ -65,7 +65,7 @@ RUN mkdir -p /container/mpich/BUILD_DIR \
 RUN sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /container/mpich/bin/mpicxx
 
 # environment variables useful for WRF build
-ENV NETCDF /container/netcdf
+ENV NETCDF=/container/netcdf
 
 # Ok, all done - let's indicate the environment
 RUN echo -e "\nPS1=\"WRF-gcc-dev> \"" >> /container/config_env.sh

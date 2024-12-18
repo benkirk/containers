@@ -11,7 +11,7 @@ RUN echo "basic zypper setup" \
     && set -x \
     && docker-clean \
     && useradd plainuser  \
-    && zypper -n install curl xz git tar \
+    && zypper -n install curl xz git tar pciutils \
     && cd /tmp/ && curl -O http://repos.openhpc.community/OpenHPC/2/Leap_15/x86_64/ohpc-release-2-1.leap15.x86_64.rpm && zypper -n --no-gpg-checks install ./ohpc-release-2-1.leap15.x86_64.rpm && rm -f ./ohpc-release-2-1.leap15.x86_64.rpm \
     && zypper -n --no-gpg-checks update \
     && zypper -n --no-gpg-checks install ohpc-base \
@@ -39,7 +39,7 @@ RUN sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /opt/ohpc/pub/mpi/${MPI
 
 RUN mkdir /opt/ohpc/pub/moduledeps/${COMPILER_VERSION}/cuda
 COPY extras/cuda-11.7 /opt/ohpc/pub/moduledeps/${COMPILER_VERSION}/cuda/11.7
-COPY extras/3.4.3-ofi-cuda /opt/ohpc/pub/moduledeps/${COMPILER_VERSION}/mpich/
+COPY extras/mpich-3.4.3-ofi-cuda /opt/ohpc/pub/moduledeps/${COMPILER_VERSION}/mpich/3.4.3-ofi-cuda
 COPY extras/hello_world_mpi.C /home/plainuser/
 COPY extras/bootstrap_libmesh.sh /home/plainuser/
 COPY extras/install_benchmarks.sh /home/plainuser/

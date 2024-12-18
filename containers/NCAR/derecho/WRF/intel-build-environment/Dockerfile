@@ -4,13 +4,13 @@ FROM --platform=linux/${ARCH} benjaminkirk/ncar-derecho-wrf-base:latest
 # Download URLs for installers inferred from spack:
 # https://github.com/spack/spack/blob/develop/var/spack/repos/builtin/packages/intel-oneapi-compilers/package.py
 RUN mkdir -p /tmp/intel_installers && cd /tmp/intel_installers \
-    && wget -q https://registrationcenter-download.intel.com/akdlm/irc_nas/19049/l_dpcpp-cpp-compiler_p_2022.2.1.16991_offline.sh \
-    && wget -q https://registrationcenter-download.intel.com/akdlm/irc_nas/18998/l_fortran-compiler_p_2022.2.1.16992_offline.sh \
+    && wget -q https://registrationcenter-download.intel.com/akdlm/IRC_NAS/b00a4b0e-bd21-41fa-ab34-19e8e2a77c5a/l_dpcpp-cpp-compiler_p_2023.2.4.24_offline.sh \
+    && wget -q https://registrationcenter-download.intel.com/akdlm/IRC_NAS/5bfaa204-689d-4bf1-9656-e37e35ea3fc2/l_fortran-compiler_p_2023.2.4.31_offline.sh \
     && chmod +x l_*compiler*.sh \
-    && ./l_dpcpp-cpp-compiler_p_2022.2.1.16991_offline.sh -a -s --eula accept --install-dir /container/intel --ignore-errors \
-    && ./l_fortran-compiler_p_2022.2.1.16992_offline.sh -a -s --eula accept --install-dir /container/intel --ignore-errors \
+    && ./l_dpcpp-cpp-compiler_p_2023.2.4.24_offline.sh -a -s --eula accept --install-dir /container/intel --ignore-errors \
+    && ./l_fortran-compiler_p_2023.2.4.31_offline.sh -a -s --eula accept --install-dir /container/intel --ignore-errors \
     && cd /container/intel \
-    && rm_paths="mpi debugger tbb conda_channel compiler/2022.2.1/linux/lib/oclfpga" \
+    && rm_paths="mpi debugger tbb conda_channel compiler/2023.2.4/linux/lib/oclfpga" \
     && echo "Removing extra bloat: ${rm_paths}" > README.whered_stuff_go && cat README.whered_stuff_go \
     && rm -rf ${rm_paths} /tmp/intel_installers /var/intel \
     && echo -e "\n# Intel compilers libraries" >> /container/config_env.sh \
@@ -19,14 +19,14 @@ RUN mkdir -p /tmp/intel_installers && cd /tmp/intel_installers \
 
 # Intel compilers do not -rpath their own libraries, relying instead on LD_LIBRARY_PATH
 # We'd rather not need that, so add to the system search path
-RUN echo "/container/intel/compiler/2022.2.1/linux/lib"     >> /etc/ld.so.conf.d/intel.conf \
-    && echo "/container/intel/compiler/2022.2.1/linux/lib/x64" >> /etc/ld.so.conf.d/intel.conf \
-    && echo "/container/intel/compiler/2022.2.1/linux/compiler/lib/intel64_lin" >> /etc/ld.so.conf.d/intel.conf \
+RUN echo "/container/intel/compiler/2023.2.4/linux/lib"     >> /etc/ld.so.conf.d/intel.conf \
+    && echo "/container/intel/compiler/2023.2.4/linux/lib/x64" >> /etc/ld.so.conf.d/intel.conf \
+    && echo "/container/intel/compiler/2023.2.4/linux/compiler/lib/intel64_lin" >> /etc/ld.so.conf.d/intel.conf \
     && ldconfig --verbose \
     && echo "silence classic compilers" \
-    && echo "-diag-disable=10441" >> /container/intel/compiler/2022.2.1/linux/bin/intel64/icc.cfg \
-    && echo "-diag-disable=10441" >> /container/intel/compiler/2022.2.1/linux/bin/intel64/icpc.cfg \
-    && echo "-diag-disable=10441" >> /container/intel/compiler/2022.2.1/linux/bin/intel64/ifort.cfg
+    && echo "-diag-disable=10441" >> /container/intel/compiler/2023.2.4/linux/bin/intel64/icc.cfg \
+    && echo "-diag-disable=10441" >> /container/intel/compiler/2023.2.4/linux/bin/intel64/icpc.cfg \
+    && echo "-diag-disable=10441" >> /container/intel/compiler/2023.2.4/linux/bin/intel64/ifort.cfg
 
 ENV MPICH_VERSION=3.4.3
 ENV NETCDF_C_VERSION=4.9.2
@@ -94,7 +94,7 @@ RUN sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /container/mpich/bin/mp
 
 # environment variables useful for WRF build
 #ENV HDF5 /container/hdf5
-ENV NETCDF /container/netcdf
+ENV NETCDF=/container/netcdf
 
 # Ok, all done - let's indicate the environment
 RUN echo -e "\nPS1=\"WRF-intel-dev> \"" >> /container/config_env.sh

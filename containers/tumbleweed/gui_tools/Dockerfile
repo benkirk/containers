@@ -32,6 +32,12 @@ RUN echo "zypper install of visual diff tools" \
               meld \
     && docker-clean
 
+RUN echo "zypper install of dbus-daemon" \
+    && set -x \
+    && zypper -n install \
+              dbus-1-daemon \
+    && docker-clean
+
 # archive this Dockerfile in the image
 ADD extras/Dockerfile.* /container/
 

@@ -37,7 +37,7 @@ RUN echo "installing esgpull (1 of 2)" \
              --yes \
              --prefix ${ESGPULL_CONDA_ENV} \
              --channel ipsl --channel conda-forge \
-             "esgpull=0.6.*" \
+             "esgpull=0.7.*" \
     && conda activate ${ESGPULL_CONDA_ENV} \
     && esgpull --version \
     && ln -s ${ESGPULL_CONDA_ENV}/bin/esgpull /usr/bin/esgpull \

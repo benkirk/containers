@@ -1,15 +1,15 @@
 ARG ARCH=amd64
 FROM --platform=linux/${ARCH} benjaminkirk/ncar-derecho-wrf-base:latest
 
-ENV NVHPC_VERSION=23.9
+ENV NVHPC_VERSION=24.9
 RUN cd /tmp \
     && echo "Downloading NVHPC v${NVHPC_VERSION}" \
-    && curl -sSL https://developer.download.nvidia.com/hpc-sdk/23.9/nvhpc_2023_239_Linux_x86_64_cuda_12.2.tar.gz | tar zx \
+    && curl -sSL https://developer.download.nvidia.com/hpc-sdk/24.9/nvhpc_2024_249_Linux_x86_64_cuda_12.6.tar.gz | tar zx \
     && echo "Installing NVHPC v${NVHPC_VERSION}" \
     && NVHPC_SILENT="true" \
        NVHPC_INSTALL_DIR="/container/nvidia/hpc_sdk" \
        NVHPC_INSTALL_TYPE="single" \
-       ./nvhpc_2023_239_Linux_x86_64_cuda_12.2/install \
+       ./nvhpc_2024_249_Linux_x86_64_cuda_12.6/install \
     && cd /container \
     && echo -e "\n# NVHPC version ${NVHPC_VERSION}" >> config_env.sh \
     && echo "export NVARCH=`uname -s`_`uname -m`" >> config_env.sh \
@@ -99,7 +99,7 @@ RUN sed -i 's/cxxlibs="-lmpicxx"/cxxlibs= #"-lmpicxx"/g' /container/mpich/bin/mp
 
 # environment variables useful for WRF build
 #ENV HDF5 /container/hdf5
-ENV NETCDF /container/netcdf
+ENV NETCDF=/container/netcdf
 
 # Ok, all done - let's indicate the environment
 RUN echo -e "\nPS1=\"WRF-nvhpc-dev> \"" >> /container/config_env.sh

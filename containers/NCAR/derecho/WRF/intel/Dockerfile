@@ -12,8 +12,8 @@ RUN echo "cloning WRF3-v${WRF3_VERSION} & WPS3-v${WPS3_VERSION}" \
     && docker-clean
 
 # clone WRF & WPS, check out only desired versions
-ENV WRF4_VERSION 4.5.2
-ENV WPS4_VERSION 4.5
+ENV WRF4_VERSION 4.6.0
+ENV WPS4_VERSION 4.6.0
 RUN echo "cloning WRF-v${WRF4_VERSION} & WPS3-v${WPS4_VERSION}" \
     && cd /container && rm -rf WRF WPS \
     && cd /container && git clone --depth 1 --branch v${WRF4_VERSION} https://github.com/wrf-model/WRF.git WRF && cd WRF \

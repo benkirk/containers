@@ -55,10 +55,10 @@ RUN echo "OS/zypper jasper too new for WPSV3, so..." \
     && docker-clean
 
 # environment variables useful for WRF build
-ENV JASPERINC /container/jasper/1.900.1/include
-ENV JASPERLIB /container/jasper/1.900.1/lib
-ENV FLEX_LIB_DIR "/usr/lib64"
-ENV YACC "/usr/bin/byacc -d"
+ENV JASPERINC=/container/jasper/1.900.1/include
+ENV JASPERLIB=/container/jasper/1.900.1/lib
+ENV FLEX_LIB_DIR="/usr/lib64"
+ENV YACC="/usr/bin/byacc -d"
 
 # archive this Dockerfile in the image
 ADD extras/Dockerfile.* /container/
