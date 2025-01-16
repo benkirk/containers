@@ -5,25 +5,21 @@
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 #----------------------------------------------------------------------------
 
-cd ${SCRIPTDIR} && echo "Building WRF-Chem in $(pwd)" || exit 1
+cd ${SCRIPTDIR} &&  echo "Building WRF in $(pwd)" || exit 1
 
 [ -f /container/config_env.sh ] && . /container/config_env.sh
 
 which mpif90 || { echo "Cannot locate an MPI compiler - check your environment?!"; exit 1; }
 
 export WRFIO_NCD_LARGE_FILE_SUPPORT=1
-export WRF_CHEM=1
-export WRF_EM_CORE=1
-export WRF_KPP=1
-export WRF_NMM_CORE=0
 
 git clean -xdf .
 
-outdir=/container/wrf-chem-${WRF_VERSION}
+outdir=/container/wrf-${WRF_VERSION}
 rm -rf ${outdir} && mkdir -p ${outdir} || exit 1
 rsync -ax ./run/ ${outdir}/
 
-env | sort > build-env-wrfchem.log
+env | sort > build-env-wrf.log
 
 # ------------------------------------------------------------------------
 # Please select from among the following Linux x86_64 options:
@@ -52,8 +48,8 @@ env | sort > build-env-wrfchem.log
 #  80. (serial)  81. (smpar)  82. (dmpar)  83. (dm+sm)   FUJITSU (frtpx/fccpx): FX10/FX100 SPARC64 IXfx/Xlfx
 
 
-./configure <<EOF 2>&1 |& tee configure-wrfchem-out.log
-3
+./configure -D <<EOF 2>&1 |& tee configure-wrf-out.log
+15
 1
 EOF
 
@@ -62,26 +58,24 @@ case "${WRF_VERSION}" in
     3.*)
         echo "appending -ltirpc to libs..."
         sed -i 's/-lnetcdff -lnetcdf/-lnetcdff -lnetcdf -ltirpc/g' configure.wrf
+
+        echo "fix ifort: command line error: option -openmp is not supported. Please use the replacement option -qopenmp"
+        sed -i 's/-openmp/-qopenmp/g' configure.wrf
         ;;
     *)
         ;;
 esac
 
-# OK, now we have a configure.wrf file.  Manually hack it up for ./chem/ usage
-# specifically, dial-down the optimization levels so than nvfortran does not hang...
-cp configure.wrf configure-wrf.chem_special
-sed -i 's/-O3/-O1/g' configure-wrf.chem_special
-sed -i 's/-O2/-O1/g' configure-wrf.chem_special
-git grep -l configure.wrf ./chem/ | xargs sed -i 's/configure.wrf/configure-wrf.chem_special/g'
-git diff ./chem/
+# replace bad optimization architecture flags
+# (ref: https://ncar-hpc-docs.readthedocs.io/en/latest/compute-systems/derecho/compiling-code-on-derecho/#optimizing-your-code-with-intel-compilers)
+sed -i 's/ -xHost/ -march=core-avx2/g' configure.wrf
+sed -i 's/ -axHost/ -march=core-avx2/g' configure.wrf
+sed -i 's/ -xCORE-AVX2/ -march=core-avx2/g' configure.wrf
+sed -i 's/ -axCORE-AVX2/ -march=core-avx2/g' configure.wrf
+sed -i 's/-O3/-O3 -march=core-avx2/g' configure.wrf
+sed -i 's/-O2/-O2 -march=core-avx2/g' configure.wrf
 
-# add optimization architecture flags
-# add optimization architecture flags
-sed -i 's/FCOPTIM         =       -O3/FCOPTIM         =       -O3 -tp=znver3/g' configure.wrf
-sed -i 's/FCOPTIM         =       -O2/FCOPTIM         =       -O2 -tp=znver3/g' configure.wrf
-
-./compile em_real 2>&1 |& tee compile-wrfchem-out.log
-#./compile em_real > compile-wrfchem-out.log 2>&1 || { cat compile-wrfchem-out.log; exit 1; }
+./compile em_real 2>&1 |& tee compile-wrf-out.log
 
 set -x
 for file in main/*.exe *.log configure.wrf; do

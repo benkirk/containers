@@ -1,5 +1,5 @@
 ARG ARCH=amd64
-FROM --platform=linux/${ARCH} benjaminkirk/ncar-derecho-wrf-base:latest
+FROM --platform=linux/${ARCH} benjaminkirk/ncar-derecho-wrf-dbg-base:latest
 
 ENV MPICH_VERSION=3.4.3
 ENV NETCDF_C_VERSION=4.9.2
@@ -48,6 +48,8 @@ RUN mkdir -p /container/mpich/BUILD_DIR \
     && cd mpich-${MPICH_VERSION} \
     && ./configure --help \
     && ./configure CXX=$(which g++) CC=$(which gcc) FC=$(which gfortran) F77=$(which gfortran) \
+                   CXXFLAGS="-g" CFLAGS="-g" FCFLAGS="-g" F77FLAGS="-g" \
+                   --enable-g=dbg \
                    --prefix=/container/mpich \
                    --with-wrapper-dl-type=none \
                    --with-device=ch4:ofi \

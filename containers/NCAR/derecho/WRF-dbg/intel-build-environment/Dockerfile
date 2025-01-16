@@ -1,5 +1,5 @@
 ARG ARCH=amd64
-FROM --platform=linux/${ARCH} benjaminkirk/ncar-derecho-wrf-base:latest
+FROM --platform=linux/${ARCH} benjaminkirk/ncar-derecho-wrf-dbg-base:latest
 
 # Download URLs for installers inferred from spack:
 # https://github.com/spack/spack/blob/develop/var/spack/repos/builtin/packages/intel-oneapi-compilers/package.py
@@ -75,6 +75,8 @@ RUN mkdir -p /container/mpich/BUILD_DIR \
     && curl -sSL http://www.mpich.org/static/downloads/${MPICH_VERSION}/mpich-${MPICH_VERSION}.tar.gz | tar zx \
     && cd mpich-${MPICH_VERSION} \
     && ./configure CXX=$(which icpc) CC=$(which icc) FC=$(which ifort) F77=$(which ifort) \
+                   CXXFLAGS="-g" CFLAGS="-g" FCFLAGS="-g" F77FLAGS="-g" \
+                   --enable-g=dbg \
                    --prefix=/container/mpich \
                    --with-wrapper-dl-type=none \
                    --with-device=ch4:ofi \

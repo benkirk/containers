@@ -15,7 +15,7 @@ export WRFIO_NCD_LARGE_FILE_SUPPORT=1
 
 git clean -xdf .
 
-outdir=/container/wrf-${WRF_VERSION}
+outdir=/container/wrf-dbg-${WRF_VERSION}
 rm -rf ${outdir} && mkdir -p ${outdir} || exit 1
 rsync -ax ./run/ ${outdir}/
 
@@ -48,8 +48,8 @@ env | sort > build-env-wrf.log
 #  80. (serial)  81. (smpar)  82. (dmpar)  83. (dm+sm)   FUJITSU (frtpx/fccpx): FX10/FX100 SPARC64 IXfx/Xlfx
 
 
-./configure <<EOF 2>&1 |& tee configure-wrf-out.log
-4
+./configure -D <<EOF 2>&1 |& tee configure-wrf-out.log
+34
 1
 EOF
 
@@ -63,12 +63,7 @@ case "${WRF_VERSION}" in
         ;;
 esac
 
-# add optimization architecture flags
-sed -i 's/FCOPTIM         =       -O3/FCOPTIM         =       -O3 -tp=znver3/g' configure.wrf
-sed -i 's/FCOPTIM         =       -O2/FCOPTIM         =       -O2 -tp=znver3/g' configure.wrf
-
-./compile em_real 2>&1 |& tee compile-wrf-out.log
-#./compile em_real > compile-wrf-out.log 2>&1 || { cat compile-wrf-out.log; exit 1; }
+./compile -j 1 em_real 2>&1 |& tee compile-wrf-out.log
 
 set -x
 for file in main/*.exe *.log configure.wrf; do
