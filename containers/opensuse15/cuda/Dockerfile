@@ -17,8 +17,8 @@ RUN echo "cuda" \
     && zypper --non-interactive --no-gpg-checks install cuda-toolkit-12-8 \
     && docker-clean
 
-RUN echo "additional deps" \
-    && zypper --non-interactive --no-gpg-checks install libxcb-cursor0 \ 
+RUN echo "driver & additional deps" \
+    && zypper --non-interactive --no-gpg-checks install nvidia-open libxcb-cursor0 \
     && docker-clean
 
 SHELL ["/bin/bash", "-lc"]
