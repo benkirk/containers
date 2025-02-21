@@ -14,7 +14,11 @@ RUN echo "basic zypper" \
 
 RUN echo "cuda" \
     && zypper --non-interactive addrepo https://developer.download.nvidia.com/compute/cuda/repos/sles15/x86_64/cuda-sles15.repo \
-    && zypper --non-interactive install cuda-toolkit-12-8 \
+    && zypper --non-interactive --no-gpg-checks install cuda-toolkit-12-8 \
+    && docker-clean
+
+RUN echo "additional deps" \
+    && zypper --non-interactive --no-gpg-checks install libxcb-cursor0 \ 
     && docker-clean
 
 SHELL ["/bin/bash", "-lc"]
