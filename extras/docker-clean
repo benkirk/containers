@@ -1,9 +1,10 @@
 #!/bin/bash
+echo "[${0}]: cleaning temporary files from container image to reduce layer size"
 
 [ -x "$(command -v yum)" ] && yum clean all
 [ -x "$(command -v apt)" ] && apt clean
 [ -x "$(command -v conda)" ] && conda clean --all
 [ -x "$(command -v zypper)" ] && zypper clean -a
-for dir in /tmp/* /var/tmp/* /home/jupyter/{.ccache,.cache/pip,conda-bld,.conda} /root/* /root/.[^.]* /var/lib/apt/lists/* /var/log/*; do
-	[ -e $dir ] && rm -rf $dir 2>/dev/null || true
+for dir in /tmp/* /var/tmp/* /home/jupyter/{.ccache,.cache/pip,conda-bld,.conda} /root/* /root/.[^.]* /var/lib/apt/lists /var/log/* ; do
+    [ -e $dir ] && rm -rf $dir 2>/dev/null || true
 done
