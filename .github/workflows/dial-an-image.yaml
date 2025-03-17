@@ -3,6 +3,12 @@ name: Select a Container Image
 on:
   workflow_dispatch:
     inputs:
+      target:
+        description: 'Target Image'
+        type: string
+        required: true
+        default: 'tumbleweed/gui_tools'
+
       publish:
         description: 'Push to DockerHub'
         type: boolean
@@ -28,8 +34,8 @@ jobs:
           which make
           pwd
           ls
-          make -C containers/tumbleweed/gui_tools extras
-          make -C containers/tumbleweed/gui_tools echo_tag version=latest
+          make -C containers/${{ inputs.target }} extras
+          make -C containers/${{ inputs.target }} echo_tag version=gha
           which docker
           docker --version
 
@@ -67,5 +73,5 @@ jobs:
           #tags: ${{ secrets.BENKIRK_DOCKERHUB_USERNAME }}/gh-ci-${{ inputs.os }}:latest
           #cache-from: type=registry,ref=${{ secrets.BENKIRK_DOCKERHUB_USERNAME }}/gh-ci-cache-${{ inputs.os }}:buildcache-${{env.INPUTS_SHA }}
           #cache-to: type=registry,ref=${{ secrets.BENKIRK_DOCKERHUB_USERNAME }}/gh-ci-cache-${{ inputs.os }}:buildcache-${{env.INPUTS_SHA }},mode=max
-          context: containers/tumbleweed/gui_tools
-          file: containers/tumbleweed/gui_tools/Dockerfile
+          context: containers/${{ inputs.target }}
+          file: containers/${{ inputs.target }}/Dockerfile
