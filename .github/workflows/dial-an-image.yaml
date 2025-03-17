@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       publish:
-        description: 'Publish to Docker Hub'
+        description: 'Push to DockerHub'
         type: boolean
         required: false
         default: false
@@ -28,7 +28,7 @@ jobs:
           which make
           pwd
           ls
-          make -C containers/devenv extras
+          make -C containers/tumbleweed/gui_tools
           which docker
           docker --version
 
@@ -66,7 +66,7 @@ jobs:
       #     tags: ${{ secrets.BENKIRK_DOCKERHUB_USERNAME }}/gh-ci-${{ inputs.os }}:latest
       #     cache-from: type=registry,ref=${{ secrets.BENKIRK_DOCKERHUB_USERNAME }}/gh-ci-cache-${{ inputs.os }}:buildcache-${{env.INPUTS_SHA }}
       #     cache-to: type=registry,ref=${{ secrets.BENKIRK_DOCKERHUB_USERNAME }}/gh-ci-cache-${{ inputs.os }}:buildcache-${{env.INPUTS_SHA }},mode=max
-      #     context: containers/devenv
+      #     context: containers/tumbleweed/gui_tools
       #     file: containers/devenv/Dockerfile
       #     build-args: |
       #       BASE_OS=${{ inputs.os }}
